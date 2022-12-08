@@ -11,6 +11,15 @@ const listService = {
     }
     return db.model("lists").filter(query).page(page).limit(limit).get(true);
   },
+  createList(body) {
+    return db.model("lists").create(body);
+  },
+  deleteList(listId) {
+    return endpoint.delete("/lists", { listId });
+  },
+  updateList(body) {
+    return endpoint.post("/lists", body);
+  },
 };
 
 export default listService;

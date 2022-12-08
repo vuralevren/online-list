@@ -1,22 +1,19 @@
-import { Menu, Transition } from "@headlessui/react";
 import { CogIcon } from "@heroicons/react/outline";
-import classNames from "classnames";
-import { Fragment, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import Button from "../components/button";
-import Input from "../components/inputs/input";
-import Navbar from "../components/navbar";
-import Modal from "../components/modals/modal";
-import NewWorkspaceForm from "../components/forms/new-workspace-form";
-import { useDispatch, useSelector } from "react-redux";
-import { workspaceActions } from "../redux/workspace/workspaceSlice";
 import _ from "lodash";
-import useArraySelector from "../helpers/useArraySelector";
-import { myRouter } from "../helpers/routes";
-import AvatarList from "../components/avatar-list";
+import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { Link } from "react-router-dom";
 import AccessBadge from "../components/access-badge";
+import AvatarList from "../components/avatar-list";
+import Button from "../components/button";
+import NewWorkspaceForm from "../components/forms/new-workspace-form";
+import Input from "../components/inputs/input";
 import ListObserver from "../components/list-observer";
-import Empty from "../components/empty";
+import Modal from "../components/modals/modal";
+import Navbar from "../components/navbar";
+import { myRouter } from "../helpers/routes";
+import useArraySelector from "../helpers/useArraySelector";
+import { workspaceActions } from "../redux/workspace/workspaceSlice";
 
 export default function Workspace() {
   const dispatch = useDispatch();
@@ -24,6 +21,7 @@ export default function Workspace() {
   const workspaceList = useArraySelector(
     ({ workspace }) => workspace.workspaces
   );
+
   const [showNewWorkspace, setShowNewWorkspace] = useState(false);
   const [searchText, setSearchText] = useState("");
 

@@ -12,6 +12,9 @@ export const listSlice = createSlice({
   initialState,
   reducers: {
     getListsRequest() {},
+    createListRequest() {},
+    deleteListRequest() {},
+    updateListRequest() {},
 
     updateLists(state, action) {
       state.lists[action.payload.key] = action.payload.value;

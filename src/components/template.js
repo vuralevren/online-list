@@ -10,7 +10,7 @@ import {
 } from "@heroicons/react/outline";
 import cs from "classnames";
 import _ from "lodash";
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -19,19 +19,21 @@ import Logo from "../components/logo";
 import functions from "../helpers/functions";
 import { myRouter } from "../helpers/routes";
 import { authActions } from "../redux/auth/authSlice";
+import { listActions } from "../redux/list/listSlice";
 import Avatar from "./avatar";
 import Container from "./container";
+import ListObserver from "./list-observer";
 import AddTeamMembersModal from "./modals/add-team-members-modal";
 import InfoModal from "./modals/info-modal";
 import TeamSideModal from "./modals/team-side-modal";
+import useArraySelector from "../helpers/useArraySelector";
 
 export default function Sidebar({ newButtonOnClick, children }) {
-  const { leagueSlug } = useParams();
+  const { workspaceSlug, listSlug } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const user = useSelector((state) => state.auth.user);
-  // const league = useSelector((state) => state.league.league);
+  const lists = useArraySelector(({ list }) => list.lists);
 
   const [openInfoModal, setOpenInfoModal] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -40,25 +42,49 @@ export default function Sidebar({ newButtonOnClick, children }) {
 
   const copyCode = () => {
     toast.success("List link was copied.");
-    // navigator.clipboard.writeText(league?.code);
+    const url = window.location;
+    navigator.clipboard.writeText(url);
+  };
+
+  useEffect(() => {
+    if (!_.isEmpty(lists)) {
+      getLists("", true);
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      dispatch(listActions.setInfo(null));
+    };
+  }, []);
+
+  const getLists = (searchText, isNewSearch = false) => {
+    dispatch(
+      listActions.getListsRequest({
+        workspaceSlug,
+        // isMember,
+        searchText: searchText || isNewSearch ? searchText.trim() : null,
+        isNewSearch,
+      })
+    );
   };
 
   const getNavigations = () => {
     return (
-      <>
-        {_.map([{ slug: "Family" }, { slug: "Business" }], ({ slug }) => (
+      <ListObserver onEnd={getLists}>
+        {_.map(lists, (list) => (
           <Link
-            key={slug}
-            to={`/league/${slug}`}
+            key={list?.slug}
+            to={myRouter.HOME(workspaceSlug, list?.slug)}
             onClick={() => sidebarOpen(false)}
             className={cs(
-              leagueSlug === slug
+              list?.slug === listSlug
                 ? "bg-indigo-800 text-white"
                 : "text-indigo-100 hover:bg-indigo-600",
               "group flex items-center px-2 py-2 text-sm font-medium rounded-md"
             )}
           >
-            {slug === "iş" ? (
+            {list?.isPublic ? (
               <UsersIcon
                 className="mr-3 flex-shrink-0 h-6 w-6 text-indigo-300"
                 aria-hidden="true"
@@ -70,10 +96,10 @@ export default function Sidebar({ newButtonOnClick, children }) {
               />
             )}
 
-            {functions.convertToTitle(slug)}
+            {functions.convertToTitle(list?.name)}
           </Link>
         ))}
-      </>
+      </ListObserver>
     );
   };
 
@@ -83,7 +109,7 @@ export default function Sidebar({ newButtonOnClick, children }) {
         className="w-full bg-indigo-500 border border-transparent rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-white hover:bg-indigo-600"
         onClick={() => {
           setSidebarOpen(false);
-          newButtonOnClick();
+          newButtonOnClick(true);
         }}
       >
         New List
@@ -207,7 +233,7 @@ export default function Sidebar({ newButtonOnClick, children }) {
                 </button>
                 {/* {league?.owner !== user?._id && ( */}
                 <Link
-                  to="/settings-workspace"
+                  to={myRouter.SETTINGS_WORKSPACE(workspaceSlug)}
                   className="-m-2.5 w-10 h-10 rounded-full inline-flex items-center justify-center text-gray-400 hover:text-gray-500"
                 >
                   <span className="sr-only">Settings</span>

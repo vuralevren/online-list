@@ -7,17 +7,20 @@ import Template from "../components/template";
 import { useNavigate, useParams } from "react-router-dom";
 import { workspaceActions } from "../redux/workspace/workspaceSlice";
 import { listActions } from "../redux/list/listSlice";
+import Empty from "../components/empty";
 
 export default function Home() {
-  const { workspaceSlug } = useParams("workspaceSlug");
+  const { workspaceSlug, listSlug } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const user = useSelector(({ auth }) => auth.user);
   const [showList, setShowList] = useState(false);
+  const [newList, setNewList] = useState(false);
 
-  const showSideList = () => {
+  const showSideList = (isNew) => {
     setShowList(true);
+    setNewList(isNew === true);
   };
 
   useEffect(() => {
@@ -26,15 +29,6 @@ export default function Home() {
         workspaceActions.getWorkspaceListBySlugRequest({
           userId: user?._id,
           slug: workspaceSlug,
-          onSuccess: (isMember) => {
-            console.log({ isMember });
-            dispatch(
-              listActions.getListsRequest({
-                workspaceSlug,
-                onlyPublic: !isMember,
-              })
-            );
-          },
           onFailure: () => {
             navigate("/");
           },
@@ -45,10 +39,20 @@ export default function Home() {
 
   return (
     <Template newButtonOnClick={showSideList}>
-      <Tabs settingsOnClick={showSideList} />
-      <ListTable />
+      {listSlug ? (
+        <>
+          <Tabs settingsOnClick={showSideList} />
+          <ListTable />
 
-      <ListSideModal show={showList} setShow={setShowList} />
+          <ListSideModal
+            show={showList}
+            setShow={setShowList}
+            newList={newList}
+          />
+        </>
+      ) : (
+        <Empty message="Select or add a list." />
+      )}
     </Template>
   );
 }

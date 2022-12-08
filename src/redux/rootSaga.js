@@ -5,6 +5,7 @@ import workspaceSaga from "./workspace/workspaceSaga";
 import listSaga from "./list/listSaga";
 import invitationSaga from "./invitation/invitationSaga";
 import realtimeSaga from "./realtime/realtimeSaga";
+import todoSaga from "./todo/todoSaga";
 
 function* rootSaga() {
   yield all([
@@ -13,6 +14,7 @@ function* rootSaga() {
     fork(listSaga),
     fork(invitationSaga),
     fork(realtimeSaga),
+    fork(todoSaga),
   ]);
 }
 

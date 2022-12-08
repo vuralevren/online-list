@@ -46,13 +46,7 @@ export default function SideModal({ show, setShow, title, children }) {
                       </div>
                     </div>
                     <div className="mt-6 relative flex-1 px-4 sm:px-6">
-                      {/* Replace with your content */}
-                      {/* <div
-                        className="h-full border-2 border-dashed border-gray-200"
-                        aria-hidden="true"
-                      /> */}
                       {children}
-                      {/* /End replace */}
                     </div>
                   </div>
                   <div className="flex-shrink-0 px-4 py-4 flex justify-end">
@@ -62,12 +56,6 @@ export default function SideModal({ show, setShow, title, children }) {
                       onClick={() => setShow(false)}
                     >
                       Cancel
-                    </Button>
-                    <Button
-                      type="submit"
-                      className="ml-4 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                      Save
                     </Button>
                   </div>
                 </div>

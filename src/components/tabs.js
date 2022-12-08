@@ -1,39 +1,34 @@
-import { Popover, Tab } from "@headlessui/react";
-import {
-  CogIcon,
-  PencilAltIcon,
-  PlusCircleIcon,
-  PlusIcon,
-  UserAddIcon,
-} from "@heroicons/react/outline";
+import { Tab } from "@headlessui/react";
+import { CogIcon } from "@heroicons/react/outline";
 import cs from "classnames";
 import _ from "lodash";
-import { useState, forwardRef } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, useParams } from "react-router-dom";
+import { myRouter } from "../helpers/routes";
+import useQuery from "../helpers/useQuery";
+import { TodoStatusTypes } from "../helpers/utils";
+import { todoActions } from "../redux/todo/todoSlice";
 import AccessBadge from "./access-badge";
 import AvatarList from "./avatar-list";
 import Button from "./button";
-import AddTeamMembersModal from "./modals/add-team-members-modal";
-import ListSideModal from "./modals/list-side-modal";
-
-const tabs = [
-  { name: "Shopping", href: "#", count: "52", current: true },
-  { name: "Fridge", href: "#", count: "52", current: false },
-  { name: "Housework", href: "#", count: "52", current: false },
-];
-
-const secondTabs = [
-  { name: "Todo", href: "#", count: "52", current: true },
-  { name: "Completed", href: "#", count: "52", current: false },
-];
 
 export default function Tabs({ settingsOnClick }) {
-  const { workspaceSlug } = useParams("workspaceSlug");
+  const { workspaceSlug, listSlug } = useParams();
 
+  const dispatch = useDispatch();
+  const status = useQuery("status");
   const workspace = useSelector(({ workspace }) =>
     _.get(workspace.workspaceList, workspaceSlug)
   );
+  const selectedStatus = useSelector(({ todo }) => todo.selectedStatus);
+
+  const setSelectedStatus = (index) => {
+    dispatch(
+      todoActions.setSelectedStatus(
+        index === 0 ? TodoStatusTypes.TODO : TodoStatusTypes.COMPLETED
+      )
+    );
+  };
 
   return (
     <div className="relative pb-5 sm:pb-0 mb-4">
@@ -56,38 +51,66 @@ export default function Tabs({ settingsOnClick }) {
       </div>
       <div className="mt-4">
         <Tab.Group
-        // onChange={(index) => handleChange(index)}
-        // selectedIndex={selectedTabIndex}
+          onChange={setSelectedStatus}
+          selectedIndex={selectedStatus === TodoStatusTypes.TODO ? 0 : 1}
         >
           <Tab.List className="flex items-center overflow-auto scrollbar-hide">
-            {secondTabs.map((tab, index) => (
+            <Link
+              className="group inline-flex items-center justify-center w-full py-2.5 px-3 text-sm font-medium leading-5 "
+              to={`${myRouter.HOME(workspaceSlug, listSlug)}`}
+            >
               <Tab
-                key={index}
-                className={({ selected }) =>
-                  cs(
-                    "group inline-flex items-center justify-center w-full py-2.5 px-3 text-sm font-medium leading-5 text-slate-700 border-b-2 border-gray-200 whitespace-nowrap",
-                    "focus:outline-none",
-                    selected
-                      ? "text-indigo-700 border-indigo-700"
-                      : "text-indigo-400 hover:text-indigo-700 hover:border-indigo-700"
-                  )
-                }
+                className={cs(
+                  "group inline-flex items-center justify-center w-full py-2.5 px-3 text-sm font-medium leading-5 text-slate-700 border-b-2 border-gray-200 whitespace-nowrap",
+                  "focus:outline-none",
+                  status !== TodoStatusTypes.COMPLETED
+                    ? "text-indigo-700 border-indigo-700"
+                    : "text-indigo-400 hover:text-indigo-700 hover:border-indigo-700"
+                )}
               >
-                <span>{tab.name}</span>
-                {tab.count ? (
+                <span>Todo</span>
+                {/* {23 ? (
                   <span
                     className={cs(
-                      tab.current
+                      status !== TodoStatusTypes.COMPLETED
                         ? "bg-indigo-100 text-indigo-600"
                         : "bg-gray-100 text-indigo-900",
                       "hidden ml-2 py-0.5 px-2.5 rounded-full text-xs font-medium md:inline-block"
                     )}
                   >
-                    {tab.count}
+                    {23}
                   </span>
-                ) : null}
+                ) : null} */}
               </Tab>
-            ))}
+            </Link>
+            <Link
+              className="group inline-flex items-center justify-center w-full py-2.5 px-3 text-sm font-medium leading-5 "
+              to={`${myRouter.HOME(workspaceSlug, listSlug)}?status=completed`}
+            >
+              <Tab
+                className={cs(
+                  "group inline-flex items-center justify-center w-full py-2.5 px-3 text-sm font-medium leading-5 text-slate-700 border-b-2 border-gray-200 whitespace-nowrap",
+                  "focus:outline-none",
+                  status === TodoStatusTypes.COMPLETED
+                    ? "text-indigo-700 border-indigo-700"
+                    : "text-indigo-400 hover:text-indigo-700 hover:border-indigo-700"
+                )}
+              >
+                <span>Completed</span>
+                {/* {23 ? (
+                  <span
+                    className={cs(
+                      status === TodoStatusTypes.COMPLETED
+                        ? "bg-indigo-100 text-indigo-600"
+                        : "bg-gray-100 text-indigo-900",
+                      "hidden ml-2 py-0.5 px-2.5 rounded-full text-xs font-medium md:inline-block"
+                    )}
+                  >
+                    {23}
+                  </span>
+                ) : null} */}
+              </Tab>
+            </Link>
           </Tab.List>
         </Tab.Group>
       </div>

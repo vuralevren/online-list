@@ -33,7 +33,6 @@ function* getWorkspaceListSaga({
           newWorkspaceList[workspace.workspaceSlug] = workspace.workspace;
         }
       }
-
       if (isNewSearch) {
         yield put(workspaceActions.setSearchText(searchText));
       }

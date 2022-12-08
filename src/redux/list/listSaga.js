@@ -55,6 +55,82 @@ function* getListsSaga({
   }
 }
 
+function* createListSaga({ payload: { body, onSuccess, onFailure } }) {
+  try {
+    const { data, errors } = yield call(listService.createList, body);
+    if (errors) {
+      throw errors;
+    }
+
+    yield put(
+      listActions.updateLists({
+        key: data.slug,
+        value: data,
+      })
+    );
+    if (_.isFunction(onSuccess)) onSuccess(data.slug);
+  } catch (e) {
+    console.log(e);
+    if (_.isFunction(onFailure)) onFailure(e);
+  }
+}
+
+function* deleteListSaga({
+  payload: { listId, listSlug, onSuccess, onFailure },
+}) {
+  try {
+    const { errors } = yield call(listService.deleteList, listId);
+    if (errors) {
+      throw errors;
+    }
+
+    yield put(
+      listActions.removeLists({
+        key: listSlug,
+      })
+    );
+    if (_.isFunction(onSuccess)) onSuccess();
+  } catch (e) {
+    console.log(e);
+    if (_.isFunction(onFailure)) onFailure(e);
+  }
+}
+
+function* updateListSaga({
+  payload: { body, listSlug, onSuccess, onFailure },
+}) {
+  try {
+    const { data: updatedList, errors } = yield call(
+      listService.updateList,
+      body
+    );
+    if (errors) {
+      throw errors;
+    }
+
+    yield put(
+      listActions.removeLists({
+        key: listSlug,
+      })
+    );
+    yield put(
+      listActions.updateLists({
+        key: updatedList.slug,
+        value: updatedList,
+      })
+    );
+    if (_.isFunction(onSuccess)) onSuccess(body.slug);
+  } catch (e) {
+    console.log(e);
+    if (_.isFunction(onFailure)) onFailure(e);
+  }
+}
+
 export default function* rootSaga() {
-  yield all([takeLatest(listActions.getListsRequest.type, getListsSaga)]);
+  yield all([
+    takeLatest(listActions.getListsRequest.type, getListsSaga),
+    takeLatest(listActions.createListRequest.type, createListSaga),
+    takeLatest(listActions.deleteListRequest.type, deleteListSaga),
+    takeLatest(listActions.updateListRequest.type, updateListSaga),
+  ]);
 }
