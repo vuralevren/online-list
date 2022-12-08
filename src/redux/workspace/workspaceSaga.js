@@ -10,7 +10,7 @@ function* getWorkspaceListSaga({
     const info = yield select(({ workspace }) => workspace.info);
     const searchedText = yield select(({ workspace }) => workspace.searchText);
     const page = _.isNil(info) || isNewSearch ? 1 : info.currentPage + 1;
-    console.log({ isNewSearch, searchText, searchedText });
+
     if (isNewSearch || _.isNil(info) || info?.currentPage < info?.totalPages) {
       const user = yield select((state) => state.auth.user);
       const { data: workspaceConncectionList, errors } = yield call(
@@ -25,10 +25,12 @@ function* getWorkspaceListSaga({
         throw errors;
       }
       let newWorkspaces = {};
+      let newWorkspaceList = {};
 
       if (!_.isEmpty(workspaceConncectionList?.data)) {
         for (const workspace of workspaceConncectionList?.data) {
           newWorkspaces[workspace.workspaceSlug] = workspace;
+          newWorkspaceList[workspace.workspaceSlug] = workspace.workspace;
         }
       }
 
@@ -42,6 +44,11 @@ function* getWorkspaceListSaga({
         })
       );
       yield put(workspaceActions.setInfo(workspaceConncectionList?.info));
+      yield put(
+        workspaceActions.setWorkspaceList({
+          newWorkspaceList,
+        })
+      );
     }
 
     if (_.isFunction(onSuccess)) onSuccess();
@@ -166,6 +173,117 @@ function* deleteWorkspaceSaga({
   }
 }
 
+function* getWorkspaceMembersSaga({
+  payload: { workspaceSlug, searchText, isNewSearch, onSuccess, onFailure },
+}) {
+  try {
+    const info = yield select(({ workspace }) => workspace.memberInfo);
+    const searchedText = yield select(
+      ({ workspace }) => workspace.memberSearchText
+    );
+    const page = _.isNil(info) || isNewSearch ? 1 : info.currentPage + 1;
+
+    if (isNewSearch || _.isNil(info) || info?.currentPage < info?.totalPages) {
+      const { data: workspaceConnectionList, errors } = yield call(
+        workspaceService.getWorkspaceMembers,
+        {
+          workspaceSlug,
+          searchText: isNewSearch ? searchText : searchedText,
+          page,
+        }
+      );
+      if (errors) {
+        throw errors;
+      }
+      let newMembers = {};
+
+      if (!_.isEmpty(workspaceConnectionList?.data)) {
+        for (const { user } of workspaceConnectionList?.data) {
+          newMembers[user._id] = user;
+        }
+      }
+
+      if (isNewSearch) {
+        yield put(workspaceActions.setMemberSearchText(searchText));
+      }
+      yield put(
+        workspaceActions.setMembers({
+          newMembers,
+          page,
+        })
+      );
+      yield put(workspaceActions.setMemberInfo(workspaceConnectionList?.info));
+    }
+
+    if (_.isFunction(onSuccess)) onSuccess();
+  } catch (e) {
+    console.log(e);
+    if (_.isFunction(onFailure)) onFailure(e);
+  }
+}
+
+function* deleteMemberSaga({
+  payload: { workspaceId, memberId, onSuccess, onFailure },
+}) {
+  try {
+    const { errors } = yield call(
+      workspaceService.deleteMember,
+      workspaceId,
+      memberId
+    );
+    if (errors) {
+      throw errors;
+    }
+
+    yield put(
+      workspaceActions.removeMembers({
+        key: memberId,
+      })
+    );
+    if (_.isFunction(onSuccess)) onSuccess();
+  } catch (e) {
+    console.log({ e });
+    if (_.isFunction(onFailure)) onFailure(e);
+  }
+}
+
+function* getWorkspaceListBySlugSaga({
+  payload: { userId, slug, onSuccess, onFailure },
+}) {
+  try {
+    const { data: workspace, errors } = yield call(
+      workspaceService.getWorkspaceListBySlug,
+      slug
+    );
+    if (errors) {
+      throw errors;
+    }
+
+    const { data: workspaceConnection, errors: connectionError } = yield call(
+      workspaceService.getWorkspaceBySlug,
+      userId,
+      slug
+    );
+
+    if (
+      !workspace.isPublic &&
+      (connectionError || _.isNil(workspaceConnection))
+    ) {
+      throw new Error("User does not have permission.");
+    }
+
+    yield put(
+      workspaceActions.updateWorkspaceList({
+        key: workspace.slug,
+        value: workspace,
+      })
+    );
+    if (_.isFunction(onSuccess)) onSuccess(!_.isNil(workspaceConnection));
+  } catch (e) {
+    if (_.isFunction(onFailure)) onFailure(e);
+  }
+}
+
 export default function* rootSaga() {
   yield all([
     takeLatest(
@@ -187,6 +305,15 @@ export default function* rootSaga() {
     takeLatest(
       workspaceActions.deleteWorkspaceRequest.type,
       deleteWorkspaceSaga
+    ),
+    takeLatest(
+      workspaceActions.getWorkspaceMembersRequest.type,
+      getWorkspaceMembersSaga
+    ),
+    takeLatest(workspaceActions.deleteMemberRequest.type, deleteMemberSaga),
+    takeLatest(
+      workspaceActions.getWorkspaceListBySlugRequest.type,
+      getWorkspaceListBySlugSaga
     ),
   ]);
 }

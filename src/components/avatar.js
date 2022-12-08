@@ -23,11 +23,11 @@ export default function Avatar({ size, anotherUser }) {
   const currentUser = useSelector((state) => state.auth.user);
   const user = anotherUser || currentUser;
 
-  return user.profilePicture ? (
+  return user?.profilePicture ? (
     <img
       className={`h-${size} w-${size} rounded-full`}
-      src={user.profilePicture}
-      alt={user.name}
+      src={user?.profilePicture}
+      alt={user?.name}
     />
   ) : (
     <span
@@ -42,8 +42,8 @@ export default function Avatar({ size, anotherUser }) {
           fontSize(size),
         ])}
       >
-        {Array.from(user.name)[0].toUpperCase()}{" "}
-        {Array.from(user.name)[1].toUpperCase()}
+        {Array.from(user?.name)[0].toUpperCase()}{" "}
+        {Array.from(user?.name)[1].toUpperCase()}
       </span>
     </span>
   );

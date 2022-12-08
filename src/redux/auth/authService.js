@@ -1,8 +1,12 @@
+import _ from "lodash";
 import { auth, db, endpoint } from "../../configs/altogic";
 
 const authService = {
-  register(user) {
-    return auth.signUpWithEmail(user.email, user.password, user);
+  register(user, emailQuery) {
+    return auth.signUpWithEmail(user.email, user.password, {
+      ...user,
+      emailVerified: !_.isNil(emailQuery),
+    });
   },
   signIn(email, password) {
     return auth.signInWithEmail(email, password);
@@ -45,6 +49,9 @@ const authService = {
   },
   updateProfilePicture(photoPublicPath) {
     return endpoint.post("/user/profilePicture", { photoPublicPath });
+  },
+  isEmailExist(email) {
+    return db.model("users").filter(`email == ${email}`).getSingle();
   },
 };
 

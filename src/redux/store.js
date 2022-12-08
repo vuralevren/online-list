@@ -4,6 +4,8 @@ import rootSaga from "./rootSaga";
 
 import { authSlice } from "./auth/authSlice";
 import { workspaceSlice } from "./workspace/workspaceSlice";
+import { listSlice } from "./list/listSlice";
+import { invitationSlice } from "./invitation/invitationSlice";
 
 const sagaMiddleware = createSagaMiddleware();
 
@@ -12,6 +14,8 @@ const makeStore = () => {
     reducer: {
       [authSlice.name]: authSlice.reducer,
       [workspaceSlice.name]: workspaceSlice.reducer,
+      [listSlice.name]: listSlice.reducer,
+      [invitationSlice.name]: invitationSlice.reducer,
     },
     devTools: true,
     middleware: (getDefaultMiddleware) =>

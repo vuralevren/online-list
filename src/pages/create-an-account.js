@@ -4,12 +4,14 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import _ from "lodash";
 import { useDispatch } from "react-redux";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Button from "../components/button";
 import Input from "../components/inputs/input";
 import Logo from "../components/logo";
 import AuthSidebar from "../components/auth-sidebar";
 import { authActions } from "../redux/auth/authSlice";
+import useQuery from "../helpers/useQuery";
+import { myRouter } from "../helpers/routes";
 
 export default function CreateAnAccount() {
   const schema = new yup.ObjectSchema({
@@ -32,22 +34,34 @@ export default function CreateAnAccount() {
     register,
     formState: { errors },
     setError,
-    clearErrors,
+    setValue,
   } = useForm({
     resolver: yupResolver(schema),
   });
 
+  const emailQuery = useQuery("email");
+  const workspaceIdQuery = useQuery("workspaceId");
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (emailQuery) setValue("email", emailQuery);
+  }, [emailQuery]);
 
   const onSubmit = (data) => {
     setIsLoading(true);
     dispatch(
       authActions.registerRequest({
         userReq: data,
-        onSuccess: () => {
-          navigate(`/email-verification/${data.email}`);
+        emailQuery,
+        workspaceIdQuery,
+        onSuccess: (workspaceSlug) => {
+          if (workspaceSlug) {
+            navigate(myRouter.HOME(workspaceSlug));
+          } else {
+            navigate(`/email-verification/${data.email}`);
+          }
           setIsLoading(false);
         },
         onFailure: (errorList) => {

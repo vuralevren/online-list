@@ -91,49 +91,47 @@ export default function Workspace() {
               New Workspace
             </Button>
           </div>
-          {false ? (
-            <Empty message="You have not workspace yet!" />
-          ) : (
-            <ListObserver onEnd={getWorkspaceList}>
-              <div className="mt-6 max-w-lg mx-auto grid gap-5 lg:grid-cols-3 lg:max-w-none">
-                {_.map(workspaceList, (workspaceObj) => (
-                  <div
-                    key={workspaceObj.workspaceSlug}
-                    className="flex flex-col rounded-lg shadow-lg overflow-hidden h-[300px]"
-                  >
-                    <div className="flex-1 bg-white p-6 flex flex-col justify-between">
-                      <Link to={myRouter.HOME(workspaceObj.workspaceSlug)}>
-                        <div className="flex-1">
-                          <div className="block mt-2">
-                            <p className="text-xl font-semibold text-gray-900">
-                              <span className="mr-2">
-                                <AccessBadge
-                                  isPublic={workspaceObj.workspace.isPublic}
-                                />
-                              </span>
-                              {workspaceObj.workspace.name}
-                            </p>
-                            <p className="mt-3 text-base text-gray-500">
-                              {workspaceObj.workspace.description ||
-                                "No Description."}
-                            </p>
+          <ListObserver onEnd={getWorkspaceList}>
+            <div className="mt-6 max-w-lg mx-auto grid gap-5 lg:grid-cols-3 lg:max-w-none">
+              {_.map(workspaceList, (workspaceObj) => (
+                <div
+                  key={workspaceObj.workspaceSlug}
+                  className="flex flex-col rounded-lg shadow-lg overflow-hidden h-[300px]"
+                >
+                  <div className="flex-1 bg-white p-6 flex flex-col justify-between">
+                    <Link to={myRouter.HOME(workspaceObj.workspaceSlug)}>
+                      <div className="flex-1">
+                        <div className="block mt-2">
+                          <p className="text-xl font-semibold text-gray-900">
+                            <span className="mr-2">
+                              <AccessBadge
+                                isPublic={workspaceObj.workspace.isPublic}
+                              />
+                            </span>
+                            {workspaceObj.workspace.name}
+                          </p>
+                          <p className="mt-3 text-base text-gray-500">
+                            {workspaceObj.workspace.description ||
+                              "No Description."}
+                          </p>
+                        </div>
+                      </div>
+                    </Link>
+                    <div className="mt-6 flex items-center justify-between">
+                      <div className="flex items-center">
+                        <AvatarList
+                          users={workspaceObj.workspace.userProfilePictures}
+                          totalSize={workspaceObj.workspace.userSize}
+                        />
+                        {workspaceObj.isOwner && (
+                          <div className="ml-2">
+                            <span className="mr-2 inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-red-100 text-yellow-600">
+                              Owner
+                            </span>
                           </div>
-                        </div>
-                      </Link>
-                      <div className="mt-6 flex items-center justify-between">
-                        <div className="flex items-center">
-                          <AvatarList
-                            users={workspaceObj.workspace.userProfilePictures}
-                            totalSize={workspaceObj.workspace.userSize}
-                          />
-                          {workspaceObj.isOwner && (
-                            <div className="ml-2">
-                              <span className="mr-2 inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-red-100 text-yellow-600">
-                                Owner
-                              </span>
-                            </div>
-                          )}
-                        </div>
+                        )}
+                      </div>
+                      {workspaceObj.isOwner && (
                         <Link
                           to={myRouter.SETTINGS_WORKSPACE(
                             workspaceObj.workspaceSlug
@@ -141,13 +139,13 @@ export default function Workspace() {
                         >
                           <CogIcon className="h-5 w-5" aria-hidden="true" />
                         </Link>
-                      </div>
+                      )}
                     </div>
                   </div>
-                ))}
-              </div>
-            </ListObserver>
-          )}
+                </div>
+              ))}
+            </div>
+          </ListObserver>
         </div>
       </div>
 

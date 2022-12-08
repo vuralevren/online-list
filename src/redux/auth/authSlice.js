@@ -22,6 +22,7 @@ export const authSlice = createSlice({
     changePasswordRequest() {},
     resetPasswordRequest() {},
     updateNameRequest() {},
+    isEmailExistRequest() {},
 
     setUser(state, action) {
       state.user = action.payload;

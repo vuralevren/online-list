@@ -17,6 +17,9 @@ import functions from "../helpers/functions";
 import useQuery from "../helpers/useQuery";
 import { workspaceActions } from "../redux/workspace/workspaceSlice";
 import { myRouter } from "../helpers/routes";
+import useArraySelector from "../helpers/useArraySelector";
+import ListObserver from "../components/list-observer";
+import Empty from "../components/empty";
 
 const leagueTeams = [
   {
@@ -76,15 +79,11 @@ export default function SettingsWorkspace() {
   const workspace = useSelector(({ workspace }) =>
     _.get(workspace.workspaces, workspaceSlug)
   );
-  const [formAvailable, setFormAvailable] = useState(true);
+  const memberList = useArraySelector(({ workspace }) => workspace.members);
+  const [searchText, setSearchText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [deletedTeam, setDeletedTeam] = useState(null);
+  const [deletedMember, setDeletedMember] = useState(null);
   const [deleteLeague, setDeleteLeague] = useState(false);
-
-  // const leagueTeams = _.reject(
-  //   league?.teams,
-  //   (team) => team.user._id === user._id
-  // );
 
   useEffect(() => {
     if (workspaceSlug) {
@@ -111,6 +110,41 @@ export default function SettingsWorkspace() {
       setValue("description", workspace?.workspace.description || "");
     }
   }, [workspace]);
+
+  useEffect(() => {
+    if (!_.isEmpty(memberList)) {
+      getMemberList("", true);
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      dispatch(workspaceActions.setMemberInfo(null));
+    };
+  }, []);
+
+  const getMemberList = (searchText, isNewSearch = false) => {
+    dispatch(
+      workspaceActions.getWorkspaceMembersRequest({
+        workspaceSlug,
+        searchText: searchText || isNewSearch ? searchText.trim() : null,
+        isNewSearch,
+      })
+    );
+  };
+
+  const handleSearch = (e) => {
+    const { value } = e.target;
+    setSearchText(_.trim(value));
+
+    if (_.size(value) > 2) {
+      _.debounce(() => {
+        getMemberList(value, true);
+      }, 500)();
+    } else if (_.size(value) === 0) {
+      getMemberList("", true);
+    }
+  };
 
   const onSubmit = ({ name, description }) => {
     setIsLoading(true);
@@ -183,7 +217,7 @@ export default function SettingsWorkspace() {
   };
 
   const removeTeam = () => {
-    // dispatch(leagueActions.deleteTeamRequest(deletedTeam));
+    dispatch(workspaceActions.deleteMemberRequest(deletedMember));
   };
 
   return (
@@ -229,7 +263,6 @@ export default function SettingsWorkspace() {
               </div>
             </div>
           </form>
-
           <div className="shadow sm:rounded-md sm:overflow-hidden">
             <div className="bg-white py-6 px-4 space-y-6 sm:p-6">
               <div>
@@ -247,14 +280,25 @@ export default function SettingsWorkspace() {
                 </Button>
               </div>
             </div>
+          </div>{" "}
+          <div className="mt-6 flex justify-between items-center">
+            <div className="grow">
+              <Input
+                autoMargin={false}
+                placeholder="Search Members"
+                onChange={handleSearch}
+                value={searchText}
+              />
+            </div>
           </div>
-
-          {leagueTeams && !_.isEmpty(leagueTeams) && (
+          <ListObserver onEnd={getMemberList}>
             <table className="min-w-full">
               <thead>
                 <tr className="border-t border-gray-200">
                   <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    <span className="lg:pl-2">MEMBERS (16)</span>
+                    <span className="lg:pl-2">
+                      MEMBERS ({workspace?.workspace.userSize})
+                    </span>
                   </th>
                   <th className="py-3 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Operation
@@ -262,11 +306,8 @@ export default function SettingsWorkspace() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-100">
-                {_.map(leagueTeams, (team) => (
-                  <tr
-                    className="group group-hover:bg-gray-50"
-                    key={team.user._id}
-                  >
+                {_.map(memberList, (member) => (
+                  <tr className="group group-hover:bg-gray-50" key={member._id}>
                     <td className="relative px-6 py-5 flex items-center space-x-3 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500">
                       <div className="flex-shrink-0">
                         <Avatar size={10} />
@@ -274,30 +315,30 @@ export default function SettingsWorkspace() {
                       <div className="flex-1 min-w-0">
                         <span className="absolute inset-0" aria-hidden="true" />
                         <p className="text-sm font-medium text-gray-900">
-                          {team.name}
+                          {member.name}
                         </p>
                       </div>
                     </td>
-                    <td className="py-3 text-sm text-gray-500 font-medium">
-                      <Button
-                        className="bg-red-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                        onClick={() =>
-                          setDeletedTeam({
-                            // leagueId: league?._id,
-                            teamId: team?._id,
-                            userId: team?.user?._id,
-                          })
-                        }
-                      >
-                        Remove
-                      </Button>
-                    </td>
+                    {member._id !== user?._id && (
+                      <td className="py-3 text-sm text-gray-500 font-medium">
+                        <Button
+                          className="bg-red-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                          onClick={() =>
+                            setDeletedMember({
+                              workspaceId: workspace?.workspace._id,
+                              memberId: member._id,
+                            })
+                          }
+                        >
+                          Remove
+                        </Button>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
             </table>
-          )}
-
+          </ListObserver>
           {deleteLeague && (
             <DeleteModal
               title="Delete Workspace"
@@ -306,11 +347,11 @@ export default function SettingsWorkspace() {
               clickDelete={deleteWorkspace}
             />
           )}
-          {deletedTeam && (
+          {deletedMember && (
             <DeleteModal
               title="Remove Team"
               description="Are you sure you would like to remove this team?"
-              setDeleteModal={() => setDeletedTeam(null)}
+              setDeleteModal={() => setDeletedMember(null)}
               clickDelete={removeTeam}
             />
           )}

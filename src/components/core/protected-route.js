@@ -23,9 +23,9 @@ export function Public({ children }) {
   const user = useSelector((state) => state.auth.user);
 
   useEffect(() => {
-    // if (user) {
-    //   navigate(hasLeague ? `/league/${_.first(user?.leagues).slug}` : "/");
-    // }
+    if (user) {
+      navigate("/");
+    }
   }, [user]);
 
   return <div>{user ? <div /> : children}</div>;

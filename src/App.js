@@ -9,10 +9,14 @@ import "react-toastify/dist/ReactToastify.css";
 import * as ProtectedRoute from "./components/core/protected-route";
 import myRoutes from "./helpers/routes";
 import ScrollToTop from "./components/scroll-top";
+import JoinModal from "./components/modals/join-team-modal";
+import useListenRealtime from "./helpers/useRealtime";
 
 const store = makeStore();
 
 export default function App() {
+  useListenRealtime();
+
   return (
     <Provider store={store}>
       <Router>
@@ -27,6 +31,8 @@ export default function App() {
                   <ProtectedRoute.Private>
                     <route.component />
                   </ProtectedRoute.Private>
+                ) : route.needAuth === null ? (
+                  <route.component />
                 ) : (
                   <ProtectedRoute.Public>
                     <route.component />
@@ -50,6 +56,8 @@ export default function App() {
         pauseOnHover
         theme="dark"
       />
+
+      {/* <JoinModal /> */}
     </Provider>
   );
 }

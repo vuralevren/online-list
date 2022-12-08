@@ -5,6 +5,12 @@ const initialState = {
   workspaces: {},
   searchText: "",
   info: null, // object
+
+  members: {},
+  memberSearchText: "",
+  memberInfo: null, // object
+
+  workspaceList: {},
 };
 
 export const workspaceSlice = createSlice({
@@ -17,6 +23,9 @@ export const workspaceSlice = createSlice({
     getWorkspaceBySlugRequest() {},
     updateWorkspaceRequest() {},
     deleteWorkspaceRequest() {},
+    getWorkspaceMembersRequest() {},
+    deleteMemberRequest() {},
+    getWorkspaceListBySlugRequest() {},
 
     updateWorkspaces(state, action) {
       state.workspaces[action.payload.key] = action.payload.value;
@@ -39,6 +48,46 @@ export const workspaceSlice = createSlice({
     },
     setSearchText(state, action) {
       state.searchText = action.payload;
+    },
+
+    updateMembers(state, action) {
+      state.members[action.payload.key] = action.payload.value;
+    },
+    removeMembers(state, action) {
+      delete state.members[action.payload.key];
+    },
+    setMembers(state, action) {
+      if (action.payload.page && action.payload.page > 1) {
+        state.members = {
+          ...state.members,
+          ...action.payload.newMembers,
+        };
+      } else {
+        state.members = action.payload.newMembers;
+      }
+    },
+    setMemberInfo(state, action) {
+      state.memberInfo = action.payload;
+    },
+    setMemberSearchText(state, action) {
+      state.memberSearchText = action.payload;
+    },
+
+    setWorkspaceList(state, action) {
+      if (action.payload.page && action.payload.page > 1) {
+        state.workspaceList = {
+          ...state.workspaceList,
+          ...action.payload.newWorkspaceList,
+        };
+      } else {
+        state.workspaceList = action.payload.newWorkspaceList;
+      }
+    },
+    updateWorkspaceList(state, action) {
+      state.workspaceList[action.payload.key] = action.payload.value;
+    },
+    removeWorkspaceList(state, action) {
+      delete state.workspaceList[action.payload.key];
     },
   },
 });

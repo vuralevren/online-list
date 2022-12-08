@@ -1,30 +1,67 @@
 import _ from "lodash";
 import { all, call, fork, put, select, takeLatest } from "redux-saga/effects";
 import { deleteFileSaga, uploadFileSaga } from "../file/fileSaga";
+import invitationService from "../invitation/invitationService";
 import authService from "./authService";
 import { authActions } from "./authSlice";
 
-function* registerSaga({ payload: { userReq, onSuccess, onFailure } }) {
+function* registerSaga({
+  payload: { userReq, emailQuery, workspaceIdQuery, onSuccess, onFailure },
+}) {
   try {
-    const { errors } = yield call(authService.register, userReq);
+    const { user, errors } = yield call(
+      authService.register,
+      userReq,
+      emailQuery
+    );
     if (errors) {
       throw errors;
     }
 
-    if (_.isFunction(onSuccess)) onSuccess();
+    let workspaceSlug = null;
+    if (emailQuery && workspaceIdQuery) {
+      const { data: workspaceConn, errors: workspaceError } = yield call(
+        invitationService.joinWorkspace,
+        workspaceIdQuery,
+        emailQuery
+      );
+      workspaceSlug = workspaceConn.workspaceSlug;
+    }
+
+    if (user) yield fork(setUserLocalSaga, user);
+    if (_.isFunction(onSuccess)) onSuccess(workspaceSlug);
   } catch (e) {
     if (_.isFunction(onFailure)) onFailure(e);
   }
 }
 
-function* signInSaga({ payload: { email, password, onSuccess, onFailure } }) {
+function* signInSaga({
+  payload: {
+    email,
+    password,
+    emailQuery,
+    workspaceIdQuery,
+    onSuccess,
+    onFailure,
+  },
+}) {
   try {
     const { user, errors } = yield call(authService.signIn, email, password);
     if (errors) {
       throw errors;
     }
 
-    if (_.isFunction(onSuccess)) onSuccess();
+    let workspaceSlug = null;
+    if (emailQuery && workspaceIdQuery) {
+      const { data: workspaceConn, errors: workspaceError } = yield call(
+        invitationService.joinWorkspace,
+        workspaceIdQuery,
+        emailQuery
+      );
+      workspaceSlug = workspaceConn.workspaceSlug;
+    }
+
+    if (_.isFunction(onSuccess)) onSuccess(workspaceSlug);
     yield put(authActions.setUser(user));
   } catch (e) {
     if (_.isFunction(onFailure)) onFailure(e);
@@ -260,6 +297,18 @@ export function* setUserLocalSaga(user) {
   yield put(authActions.setUser(user));
 }
 
+function* isEmailExistSaga({ payload: { email, onSuccess, onFailure } }) {
+  try {
+    const { data, errors } = yield call(authService.isEmailExist, email);
+    if (errors) {
+      throw errors;
+    }
+    if (_.isFunction(onSuccess)) onSuccess();
+  } catch (e) {
+    if (_.isFunction(onFailure)) onFailure(e);
+  }
+}
+
 export default function* rootSaga() {
   yield all([
     fork(getUserFromDBSaga),
@@ -285,5 +334,6 @@ export default function* rootSaga() {
     takeLatest(authActions.changePasswordRequest.type, changePasswordSaga),
     takeLatest(authActions.resetPasswordRequest.type, resetPasswordSaga),
     takeLatest(authActions.updateNameRequest.type, updateNameSaga),
+    takeLatest(authActions.isEmailExistRequest.type, isEmailExistSaga),
   ]);
 }

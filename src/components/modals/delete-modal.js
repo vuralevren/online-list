@@ -66,7 +66,7 @@ function DeleteModal({ title, description, setDeleteModal, clickDelete }) {
                   setDeleteModal(false);
                 }}
               >
-                Delete
+                Remove
               </button>
             </div>
           </div>

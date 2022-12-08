@@ -4,12 +4,14 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import _ from "lodash";
 import { useDispatch } from "react-redux";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Logo from "../components/logo";
 import Button from "../components/button";
 import Input from "../components/inputs/input";
 import AuthSidebar from "../components/auth-sidebar";
 import { authActions } from "../redux/auth/authSlice";
+import { myRouter } from "../helpers/routes";
+import useQuery from "../helpers/useQuery";
 
 export default function SignIn() {
   const schema = new yup.ObjectSchema({
@@ -26,13 +28,20 @@ export default function SignIn() {
     register,
     formState: { errors },
     setError,
+    setValue,
   } = useForm({
     resolver: yupResolver(schema),
   });
 
+  const emailQuery = useQuery("email");
+  const workspaceIdQuery = useQuery("workspaceId");
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (emailQuery) setValue("email", emailQuery);
+  }, [emailQuery]);
 
   const onSubmit = ({ email, password }) => {
     setIsLoading(true);
@@ -40,8 +49,14 @@ export default function SignIn() {
       authActions.signInRequest({
         email,
         password,
-        onSuccess: () => {
-          navigate("/");
+        emailQuery,
+        workspaceIdQuery,
+        onSuccess: (workspaceSlug) => {
+          if (workspaceSlug) {
+            navigate(myRouter.HOME(workspaceSlug));
+          } else {
+            navigate("/");
+          }
           setIsLoading(false);
         },
         onFailure: (errorList) => {

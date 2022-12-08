@@ -9,7 +9,10 @@ import {
 import cs from "classnames";
 import _ from "lodash";
 import { useState, forwardRef } from "react";
-import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { Link, useParams } from "react-router-dom";
+import AccessBadge from "./access-badge";
+import AvatarList from "./avatar-list";
 import Button from "./button";
 import AddTeamMembersModal from "./modals/add-team-members-modal";
 import ListSideModal from "./modals/list-side-modal";
@@ -26,35 +29,21 @@ const secondTabs = [
 ];
 
 export default function Tabs({ settingsOnClick }) {
+  const { workspaceSlug } = useParams("workspaceSlug");
+
+  const workspace = useSelector(({ workspace }) =>
+    _.get(workspace.workspaceList, workspaceSlug)
+  );
+
   return (
     <div className="relative pb-5 sm:pb-0 mb-4">
       <div className="flex justify-between items-center">
         <h3 className="flex items-center text-lg leading-6 font-medium text-gray-900">
-          <span class="flex -space-x-2 overflow-hidden">
-            <img
-              class="inline-block h-7 w-7 rounded-full ring-2 ring-white"
-              src="https://images.unsplash.com/photo-1491528323818-fdd1faba62cc?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-              alt=""
-            />
-            <img
-              class="inline-block h-7 w-7 rounded-full ring-2 ring-white"
-              src="https://images.unsplash.com/photo-1550525811-e5869dd03032?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-              alt=""
-            />
-            <img
-              class="inline-block h-7 w-7 rounded-full ring-2 ring-white"
-              src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2.25&w=256&h=256&q=80"
-              alt=""
-            />
-            <img
-              class="inline-block h-7 w-7 rounded-full ring-2 ring-white"
-              src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-              alt=""
-            />
-          </span>
-          <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-red-100 text-red-800">
-            Private
-          </span>
+          <AvatarList
+            users={workspace?.userProfilePictures}
+            totalSize={workspace?.userSize}
+          />
+          <AccessBadge isPublic={workspace?.isPublic} />
         </h3>
         <div className="flex md:mt-0 justify-end">
           <Button onClick={settingsOnClick}>

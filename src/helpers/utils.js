@@ -9,3 +9,7 @@ export const FirstGoalStatus = {
   AWAY: "away",
   DRAW: "none",
 };
+
+export const RealtimeTypes = {
+  INVITATION: "invitation",
+};

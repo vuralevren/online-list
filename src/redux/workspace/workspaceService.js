@@ -29,6 +29,24 @@ const workspaceService = {
   deleteWorkspace(workspaceId) {
     return endpoint.delete("/workspace", { workspaceId });
   },
+  getWorkspaceMembers({ workspaceSlug, searchText, page = 1, limit = 12 }) {
+    let query = `workspaceSlug == '${workspaceSlug}'`;
+    if (searchText)
+      query += ` && INCLUDES(TOLOWER(user.name), TOLOWER('${searchText}'))`;
+    return db
+      .model("user_workspace_connections")
+      .filter(query)
+      .lookup({ field: "user" })
+      .page(page)
+      .limit(limit)
+      .get(true);
+  },
+  deleteMember(workspaceId, memberId) {
+    return endpoint.delete("/workspace/member", { workspaceId, memberId });
+  },
+  getWorkspaceListBySlug(slug) {
+    return db.model("workspaces").filter(`slug == '${slug}'`).getSingle();
+  },
 };
 
 export default workspaceService;

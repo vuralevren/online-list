@@ -1,0 +1,48 @@
+import _ from "lodash";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, useParams } from "react-router-dom";
+import { myRouter } from "../helpers/routes";
+import useQuery from "../helpers/useQuery";
+import { authActions } from "../redux/auth/authSlice";
+import { invitationActions } from "../redux/invitation/invitationSlice";
+
+export default function JoinRedirect() {
+  const { email, workspaceId } = useParams();
+  const isExist = useQuery("isExist");
+
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const user = useSelector((state) => state.auth.user);
+
+  const joinWorkspace = () => {
+    dispatch(
+      invitationActions.joinWorkspaceRequest({
+        workspaceId,
+        email,
+        onSuccess: (slug) => {
+          navigate(myRouter.HOME(slug));
+        },
+        onFailure: (e) => {
+          navigate("/");
+        },
+      })
+    );
+  };
+
+  useEffect(() => {
+    if (user) {
+      joinWorkspace();
+    } else {
+      if (isExist) navigate(myRouter.SIGN_IN(email, workspaceId));
+      else navigate(myRouter.CREATE_AN_ACCOUNT(email, workspaceId));
+    }
+  }, []);
+
+  return (
+    <div>
+      <div>Redirecting...</div>
+    </div>
+  );
+}

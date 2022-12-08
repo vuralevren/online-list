@@ -1,23 +1,15 @@
-/*
-  This example requires Tailwind CSS v2.0+ 
-  
-  This example requires some changes to your config:
-  
-  ```
-  // tailwind.config.js
-  module.exports = {
-    // ...
-    plugins: [
-      // ...
-      require('@tailwindcss/forms'),
-    ],
-  }
-  ```
-*/
-import { PlusSmIcon } from "@heroicons/react/solid";
-import Button from "../button";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useForm } from "react-hook-form";
+import * as yup from "yup";
+import _ from "lodash";
+import { useDispatch, useSelector } from "react-redux";
+import { useState } from "react";
+import { PlusSmIcon } from "@heroicons/react/outline";
 import Input from "../inputs/input";
 import Modal from "./modal";
+import Button from "../button";
+import { invitationActions } from "../../redux/invitation/invitationSlice";
 
 const people = [
   {
@@ -50,6 +42,48 @@ const people = [
 ];
 
 export default function AddTeamMembersModal({ show, setShow }) {
+  const schema = new yup.ObjectSchema({
+    email: yup.string().email().required("Email is required"),
+  });
+
+  const {
+    handleSubmit,
+    register,
+    formState: { errors },
+    setError,
+    clearErrors,
+  } = useForm({
+    resolver: yupResolver(schema),
+  });
+
+  const { workspaceSlug } = useParams("workspaceSlug");
+  const dispatch = useDispatch();
+  const workspace = useSelector(({ workspace }) =>
+    _.get(workspace.workspaceList, workspaceSlug)
+  );
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const onSubmit = ({ email }) => {
+    setIsLoading(true);
+    dispatch(
+      invitationActions.sendInvitationRequest({
+        workspaceId: workspace?._id,
+        email,
+        onSuccess: () => {
+          setIsLoading(false);
+        },
+        onFailure: (errorList) => {
+          setError("email", {
+            type: "manuel",
+            message: _.get(errorList, "items[0].message"),
+          });
+          setIsLoading(false);
+        },
+      })
+    );
+  };
+
   return (
     <Modal show={show} setShow={setShow}>
       <div className="max-w-lg mx-auto">
@@ -73,23 +107,26 @@ export default function AddTeamMembersModal({ show, setShow }) {
               Add team members
             </h2>
           </div>
-          <form action="#" className="mt-6 flex">
-            <label htmlFor="email" className="sr-only">
-              Email address
-            </label>
-            <input
-              type="email"
-              name="email"
-              id="email"
-              className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-              placeholder="Enter an email"
-            />
-            <button
-              type="submit"
-              className="ml-4 flex-shrink-0 px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              Send invite
-            </button>
+          <form onSubmit={handleSubmit(onSubmit)} className="mt-6 flex">
+            <div className="flex justify-between items-center">
+              <div className="grow">
+                <Input
+                  id="email"
+                  name="email"
+                  placeholder="johndoe@example.com"
+                  autoMargin={false}
+                  register={register("email")}
+                  error={errors.email}
+                />
+              </div>
+              <Button
+                type="submit"
+                className="bg-indigo-500 border border-transparent rounded-md py-2.5 px-3 ml-3 flex items-center justify-center text-sm font-medium text-white hover:bg-indigo-600"
+                loading={isLoading}
+              >
+                Send invite
+              </Button>
+            </div>
           </form>
         </div>
         <div className="mt-10">
@@ -119,7 +156,7 @@ export default function AddTeamMembersModal({ show, setShow }) {
                     </p>
                   </div>
                 </div>
-                {/* <div className="flex-shrink-0">
+                <div className="flex-shrink-0">
                   <button
                     type="button"
                     className="inline-flex items-center py-2 px-3 border border-transparent rounded-full bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -129,11 +166,10 @@ export default function AddTeamMembersModal({ show, setShow }) {
                       aria-hidden="true"
                     />
                     <span className="text-sm font-medium text-gray-900">
-                      {" "}
                       Invite <span className="sr-only">{person.name}</span>{" "}
                     </span>
                   </button>
-                </div> */}
+                </div>
               </li>
             ))}
           </ul>
