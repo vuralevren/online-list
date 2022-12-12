@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import * as yup from "yup";
 import { myRouter } from "../../helpers/routes";
 import { workspaceActions } from "../../redux/workspace/workspaceSlice";
@@ -47,6 +48,7 @@ export default function NewWorkspaceForm(params) {
         description,
         isPublic,
         onSuccess: (slug) => {
+          toast.success("Workspace created successfully");
           setIsLoading(false);
           navigate(myRouter.HOME(slug));
         },

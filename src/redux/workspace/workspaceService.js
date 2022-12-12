@@ -44,8 +44,11 @@ const workspaceService = {
   deleteMember(workspaceId, memberId) {
     return endpoint.delete("/workspace/member", { workspaceId, memberId });
   },
-  getWorkspaceListBySlug(slug) {
-    return db.model("workspaces").filter(`slug == '${slug}'`).getSingle();
+  getWorkspaceListBySlug(workspaceSlug, userId) {
+    return endpoint.get("/workspace/bySlug", { workspaceSlug, userId });
+  },
+  isMemberWorkspace(workspaceSlug) {
+    return endpoint.get("/workspace/isMember", { workspaceSlug });
   },
 };
 

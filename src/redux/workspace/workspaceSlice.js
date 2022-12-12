@@ -26,6 +26,7 @@ export const workspaceSlice = createSlice({
     getWorkspaceMembersRequest() {},
     deleteMemberRequest() {},
     getWorkspaceListBySlugRequest() {},
+    getIsMemberWorkspaceRequest() {},
 
     updateWorkspaces(state, action) {
       state.workspaces[action.payload.key] = action.payload.value;

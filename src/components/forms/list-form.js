@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 import * as yup from "yup";
 import functions from "../../helpers/functions";
 import { myRouter } from "../../helpers/routes";
@@ -75,9 +76,13 @@ export default function ListForm({ newList, setShow }) {
     dispatch(
       listActions.createListRequest({
         body,
+        workspaceSlug,
+        listSlug,
         onSuccess: (slug) => {
           setIsLoading(false);
           setShow(false);
+          toast.success("List created successfully");
+          navigate(myRouter.HOME(workspaceSlug, slug));
         },
         onFailure: (errorList) => {
           setError("name", {
@@ -101,6 +106,7 @@ export default function ListForm({ newList, setShow }) {
       listActions.updateListRequest({
         body,
         listSlug,
+        workspaceSlug,
         onSuccess: (slug) => {
           setIsLoading(false);
           setShow(false);
@@ -122,7 +128,9 @@ export default function ListForm({ newList, setShow }) {
       listActions.deleteListRequest({
         listId: list?._id,
         listSlug,
+        workspaceSlug,
         onSuccess: (slug) => {
+          navigate(myRouter.HOME(workspaceSlug));
           setShow(false);
         },
       })
@@ -140,12 +148,14 @@ export default function ListForm({ newList, setShow }) {
         error={errors.name}
       />
       <div className="my-3">
-        <RadioToggle
-          label="Public"
-          enabled={isPublic}
-          disabled={!workspace?.isPublic}
-          setEnabled={setIsPublic}
-        />
+        {newList && (
+          <RadioToggle
+            label="Public"
+            enabled={isPublic}
+            disabled={!workspace?.isPublic}
+            setEnabled={setIsPublic}
+          />
+        )}
       </div>
       <Button
         type="submit"

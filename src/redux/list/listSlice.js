@@ -38,6 +38,22 @@ export const listSlice = createSlice({
     setSearchText(state, action) {
       state.searchText = action.payload;
     },
+    setTodoSize(state, action) {
+      const list = state.lists[action.payload.key];
+      if (list && action.payload.type === "increase") {
+        list.todoSize++;
+      } else {
+        list.todoSize--;
+      }
+    },
+    setCompletedSize(state, action) {
+      const list = state.lists[action.payload.key];
+      if (list && action.payload.type === "increase") {
+        list.completedSize++;
+      } else if (list) {
+        list.completedSize--;
+      }
+    },
   },
 });
 

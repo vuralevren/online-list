@@ -252,23 +252,11 @@ function* getWorkspaceListBySlugSaga({
   try {
     const { data: workspace, errors } = yield call(
       workspaceService.getWorkspaceListBySlug,
-      slug
+      slug,
+      userId
     );
     if (errors) {
       throw errors;
-    }
-
-    const { data: workspaceConnection, errors: connectionError } = yield call(
-      workspaceService.getWorkspaceBySlug,
-      userId,
-      slug
-    );
-
-    if (
-      !workspace.isPublic &&
-      (connectionError || _.isNil(workspaceConnection))
-    ) {
-      throw new Error("User does not have permission.");
     }
 
     yield put(
@@ -277,7 +265,25 @@ function* getWorkspaceListBySlugSaga({
         value: workspace,
       })
     );
-    if (_.isFunction(onSuccess)) onSuccess(!_.isNil(workspaceConnection));
+    if (_.isFunction(onSuccess)) onSuccess();
+  } catch (e) {
+    if (_.isFunction(onFailure)) onFailure(e);
+  }
+}
+
+function* getIsMemberWorkspaceSaga({
+  payload: { slug, onSuccess, onFailure },
+}) {
+  try {
+    const { data, errors } = yield call(
+      workspaceService.isMemberWorkspace,
+      slug
+    );
+    if (errors) {
+      throw errors;
+    }
+
+    if (_.isFunction(onSuccess)) onSuccess(data.isMember);
   } catch (e) {
     if (_.isFunction(onFailure)) onFailure(e);
   }
@@ -313,6 +319,10 @@ export default function* rootSaga() {
     takeLatest(
       workspaceActions.getWorkspaceListBySlugRequest.type,
       getWorkspaceListBySlugSaga
+    ),
+    takeLatest(
+      workspaceActions.getIsMemberWorkspaceRequest.type,
+      getIsMemberWorkspaceSaga
     ),
   ]);
 }

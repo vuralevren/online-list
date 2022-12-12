@@ -15,8 +15,6 @@ import useListenRealtime from "./helpers/useRealtime";
 const store = makeStore();
 
 export default function App() {
-  useListenRealtime();
-
   return (
     <Provider store={store}>
       <Router>

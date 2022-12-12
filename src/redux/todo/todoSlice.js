@@ -17,6 +17,7 @@ export const todoSlice = createSlice({
     createTodoRequest() {},
     updateTodoRequest() {},
     updateFieldsTodoRequest() {},
+    changeStatusTodoRequest() {},
     deleteTodoRequest() {},
 
     updateTodos(state, action) {

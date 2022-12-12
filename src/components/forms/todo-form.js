@@ -5,6 +5,8 @@ import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import * as yup from "yup";
+import useQuery from "../../helpers/useQuery";
+import { TodoStatusTypes } from "../../helpers/utils";
 import { todoActions } from "../../redux/todo/todoSlice";
 import Button from "../button";
 import Input from "../inputs/input";
@@ -35,6 +37,7 @@ export default function TodoForm({ selectedTodo, setSelectedTodo }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { listSlug, workspaceSlug } = useParams();
+  const status = useQuery("status");
   const workspace = useSelector(({ workspace }) =>
     _.get(workspace.workspaceList, workspaceSlug)
   );
@@ -69,6 +72,12 @@ export default function TodoForm({ selectedTodo, setSelectedTodo }) {
     dispatch(
       todoActions.createTodoRequest({
         body,
+        workspaceSlug,
+        listSlug,
+        status:
+          status === TodoStatusTypes.COMPLETED
+            ? status === TodoStatusTypes.COMPLETED
+            : TodoStatusTypes.TODO,
         onSuccess: (slug) => {
           setIsLoading(false);
           setSelectedTodo(null);
@@ -93,7 +102,12 @@ export default function TodoForm({ selectedTodo, setSelectedTodo }) {
     dispatch(
       todoActions.updateTodoRequest({
         body,
+        workspaceSlug,
         listSlug,
+        status:
+          status === TodoStatusTypes.COMPLETED
+            ? status === TodoStatusTypes.COMPLETED
+            : TodoStatusTypes.TODO,
         onSuccess: (slug) => {
           setIsLoading(false);
           setSelectedTodo(null);

@@ -309,6 +309,25 @@ function* isEmailExistSaga({ payload: { email, onSuccess, onFailure } }) {
   }
 }
 
+function* searchEmailOrNameSaga({
+  payload: { searchText, onSuccess, onFailure },
+}) {
+  try {
+    const { data, errors } = yield call(
+      authService.searchEmailOrName,
+      searchText
+    );
+    if (errors) {
+      throw errors;
+    }
+
+    yield put(authActions.setFoundUsers(data));
+    if (_.isFunction(onSuccess)) onSuccess();
+  } catch (e) {
+    if (_.isFunction(onFailure)) onFailure(e);
+  }
+}
+
 export default function* rootSaga() {
   yield all([
     fork(getUserFromDBSaga),
@@ -335,5 +354,9 @@ export default function* rootSaga() {
     takeLatest(authActions.resetPasswordRequest.type, resetPasswordSaga),
     takeLatest(authActions.updateNameRequest.type, updateNameSaga),
     takeLatest(authActions.isEmailExistRequest.type, isEmailExistSaga),
+    takeLatest(
+      authActions.searchEmailOrNameRequest.type,
+      searchEmailOrNameSaga
+    ),
   ]);
 }

@@ -53,6 +53,9 @@ const authService = {
   isEmailExist(email) {
     return db.model("users").filter(`email == ${email}`).getSingle();
   },
+  searchEmailOrName(searchText) {
+    return endpoint.get("/user/search", { searchText });
+  },
 };
 
 export default authService;

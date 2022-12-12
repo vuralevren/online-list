@@ -1,12 +1,16 @@
 import _ from "lodash";
 import { all, call, put, select, takeLatest, fork } from "redux-saga/effects";
+import { clientKey } from "../../configs/altogic";
+import { EventType } from "../../helpers/useRealtime";
+import realtimeService from "../realtime/realtimeService";
+import workspaceService from "../workspace/workspaceService";
 import listService from "./listService";
 import { listActions } from "./listSlice";
 
 function* getListsSaga({
   payload: {
     workspaceSlug,
-    isMember,
+    userId,
     searchText,
     isNewSearch,
     onSuccess,
@@ -15,23 +19,37 @@ function* getListsSaga({
 }) {
   try {
     const info = yield select(({ list }) => list.info);
-    const searchedText = yield select(({ list }) => list.searchText);
     const page = _.isNil(info) || isNewSearch ? 1 : info.currentPage + 1;
+    let isMember;
 
     if (isNewSearch || _.isNil(info) || info?.currentPage < info?.totalPages) {
       const { data: lists, errors } = yield call(listService.getLists, {
         workspaceSlug,
-        isMember,
-        searchText: isNewSearch ? searchText : searchedText,
+        userId,
         page,
       });
       if (errors) {
         throw errors;
       }
+
+      if (userId) {
+        const { data, errors } = yield call(
+          workspaceService.isMemberWorkspace,
+          workspaceSlug
+        );
+        if (errors) {
+          throw errors;
+        }
+        isMember = data.isMember;
+      }
+      const result = _.filter(
+        lists?.result,
+        (result) => result.isPublic || isMember
+      );
       let newLists = {};
 
-      if (!_.isEmpty(lists?.data)) {
-        for (const list of lists?.data) {
+      if (!_.isEmpty(result)) {
+        for (const list of result) {
           newLists[list.slug] = list;
         }
       }
@@ -45,7 +63,7 @@ function* getListsSaga({
           page,
         })
       );
-      yield put(listActions.setInfo(lists?.info));
+      yield put(listActions.setInfo(lists?.countInfo));
     }
 
     if (_.isFunction(onSuccess)) onSuccess();
@@ -55,7 +73,9 @@ function* getListsSaga({
   }
 }
 
-function* createListSaga({ payload: { body, onSuccess, onFailure } }) {
+function* createListSaga({
+  payload: { body, workspaceSlug, onSuccess, onFailure },
+}) {
   try {
     const { data, errors } = yield call(listService.createList, body);
     if (errors) {
@@ -68,6 +88,13 @@ function* createListSaga({ payload: { body, onSuccess, onFailure } }) {
         value: data,
       })
     );
+
+    const realtimeKey = yield select(({ auth }) => auth.realtimeKey);
+    realtimeService.sendMessage(clientKey, EventType.NEW_LIST, {
+      sent: realtimeKey,
+      workspace: workspaceSlug,
+      data,
+    });
     if (_.isFunction(onSuccess)) onSuccess(data.slug);
   } catch (e) {
     console.log(e);
@@ -76,7 +103,7 @@ function* createListSaga({ payload: { body, onSuccess, onFailure } }) {
 }
 
 function* deleteListSaga({
-  payload: { listId, listSlug, onSuccess, onFailure },
+  payload: { listId, listSlug, workspaceSlug, onSuccess, onFailure },
 }) {
   try {
     const { errors } = yield call(listService.deleteList, listId);
@@ -89,6 +116,13 @@ function* deleteListSaga({
         key: listSlug,
       })
     );
+
+    const realtimeKey = yield select(({ auth }) => auth.realtimeKey);
+    realtimeService.sendMessage(clientKey, EventType.DELETE_LIST, {
+      sent: realtimeKey,
+      workspace: workspaceSlug,
+      list: listSlug,
+    });
     if (_.isFunction(onSuccess)) onSuccess();
   } catch (e) {
     console.log(e);
@@ -97,7 +131,7 @@ function* deleteListSaga({
 }
 
 function* updateListSaga({
-  payload: { body, listSlug, onSuccess, onFailure },
+  payload: { body, listSlug, workspaceSlug, onSuccess, onFailure },
 }) {
   try {
     const { data: updatedList, errors } = yield call(
@@ -119,6 +153,14 @@ function* updateListSaga({
         value: updatedList,
       })
     );
+
+    const realtimeKey = yield select(({ auth }) => auth.realtimeKey);
+    realtimeService.sendMessage(clientKey, EventType.UPDATE_LIST, {
+      sent: realtimeKey,
+      workspace: workspaceSlug,
+      list: listSlug,
+      data: updatedList,
+    });
     if (_.isFunction(onSuccess)) onSuccess(body.slug);
   } catch (e) {
     console.log(e);

@@ -1,45 +1,18 @@
-import { Link, useNavigate, useParams } from "react-router-dom";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { useForm } from "react-hook-form";
-import * as yup from "yup";
-import _ from "lodash";
-import { useDispatch, useSelector } from "react-redux";
-import { useState } from "react";
 import { PlusSmIcon } from "@heroicons/react/outline";
+import { yupResolver } from "@hookform/resolvers/yup";
+import _ from "lodash";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
+import { toast } from "react-toastify";
+import * as yup from "yup";
+import { authActions } from "../../redux/auth/authSlice";
+import { invitationActions } from "../../redux/invitation/invitationSlice";
+import Avatar from "../avatar";
+import Button from "../button";
 import Input from "../inputs/input";
 import Modal from "./modal";
-import Button from "../button";
-import { invitationActions } from "../../redux/invitation/invitationSlice";
-
-const people = [
-  {
-    name: "Lindsay Walton",
-    handle: "lindsaywalton",
-    email: "lindsaywalton@example.com",
-    role: "Front-end Developer",
-    imageId: "1517841905240-472988babdf9",
-    imageUrl:
-      "https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-  },
-  {
-    name: "Courtney Henry",
-    handle: "courtneyhenry",
-    email: "courtneyhenry@example.com",
-    role: "Designer",
-    imageId: "1438761681033-6461ffad8d80",
-    imageUrl:
-      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-  },
-  {
-    name: "Tom Cook",
-    handle: "tomcook",
-    email: "tomcook@example.com",
-    role: "Director, Product Development",
-    imageId: "1472099645785-5658abf4ff4e",
-    imageUrl:
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-  },
-];
 
 export default function AddTeamMembersModal({ show, setShow }) {
   const schema = new yup.ObjectSchema({
@@ -51,7 +24,6 @@ export default function AddTeamMembersModal({ show, setShow }) {
     register,
     formState: { errors },
     setError,
-    clearErrors,
   } = useForm({
     resolver: yupResolver(schema),
   });
@@ -61,17 +33,36 @@ export default function AddTeamMembersModal({ show, setShow }) {
   const workspace = useSelector(({ workspace }) =>
     _.get(workspace.workspaceList, workspaceSlug)
   );
+  const foundUsers = useSelector(({ auth }) => auth.foundUsers);
+  const user = useSelector(({ auth }) => auth.user);
 
   const [isLoading, setIsLoading] = useState(false);
+  const [searchText, setSearchText] = useState("");
 
-  const onSubmit = ({ email }) => {
-    setIsLoading(true);
+  const handleSearch = (e) => {
+    const { value } = e.target;
+    setSearchText(_.trim(value));
+
+    if (_.size(value) > 2) {
+      _.debounce(() => {
+        dispatch(
+          authActions.searchEmailOrNameRequest({
+            searchText,
+          })
+        );
+      }, 500)();
+    }
+  };
+
+  const sendInvitation = (email) => {
     dispatch(
       invitationActions.sendInvitationRequest({
         workspaceId: workspace?._id,
         email,
         onSuccess: () => {
           setIsLoading(false);
+          setShow(false);
+          toast.success("Invitation sent successfully");
         },
         onFailure: (errorList) => {
           setError("email", {
@@ -82,6 +73,16 @@ export default function AddTeamMembersModal({ show, setShow }) {
         },
       })
     );
+  };
+
+  const sendInviteToRegisteredUser = (email) => {
+    setIsLoading(true);
+    sendInvitation(email);
+  };
+
+  const onSubmit = ({ email }) => {
+    setIsLoading(true);
+    sendInvitation(email);
   };
 
   return (
@@ -116,64 +117,74 @@ export default function AddTeamMembersModal({ show, setShow }) {
                   placeholder="johndoe@example.com"
                   autoMargin={false}
                   register={register("email")}
+                  onChange={handleSearch}
+                  value={searchText}
                   error={errors.email}
                 />
               </div>
               <Button
                 type="submit"
                 className="bg-indigo-500 border border-transparent rounded-md py-2.5 px-3 ml-3 flex items-center justify-center text-sm font-medium text-white hover:bg-indigo-600"
-                loading={isLoading}
+                disabled={isLoading}
               >
                 Send invite
               </Button>
             </div>
           </form>
         </div>
-        <div className="mt-10">
-          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-            Suggestions
-          </h3>
-          <ul
-            role="list"
-            className="mt-4 border-t border-b border-gray-200 divide-y divide-gray-200"
-          >
-            {people.map((person, personIdx) => (
-              <li
-                key={personIdx}
-                className="py-4 flex items-center justify-between space-x-3"
-              >
-                <div className="min-w-0 flex-1 flex items-center space-x-3">
-                  <div className="flex-shrink-0">
-                    <img
-                      className="h-10 w-10 rounded-full"
-                      src={person.imageUrl}
-                      alt=""
-                    />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-gray-900 truncate">
-                      {person.name}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex-shrink-0">
-                  <button
-                    type="button"
-                    className="inline-flex items-center py-2 px-3 border border-transparent rounded-full bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        {_.size(searchText) > 2 && !_.isEmpty(foundUsers) && (
+          <div className="mt-10">
+            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              Suggestions
+            </h3>
+            <ul
+              role="list"
+              className="mt-4 border-t border-b border-gray-200 divide-y divide-gray-200"
+            >
+              {foundUsers
+                .filter((person) => person._id !== user?._id)
+                .map((person) => (
+                  <li
+                    key={person._id}
+                    className="py-4 flex items-center justify-between space-x-3"
                   >
-                    <PlusSmIcon
-                      className="-ml-1 mr-0.5 h-5 w-5 text-gray-400"
-                      aria-hidden="true"
-                    />
-                    <span className="text-sm font-medium text-gray-900">
-                      Invite <span className="sr-only">{person.name}</span>{" "}
-                    </span>
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
+                    <div className="min-w-0 flex-1 flex items-center space-x-3">
+                      <div className="flex-shrink-0">
+                        <Avatar
+                          size={10}
+                          anotherUser={{
+                            name: person.name,
+                            profilePicture: person.profilePicture,
+                          }}
+                        />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-gray-900 truncate">
+                          {person.name}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex-shrink-0">
+                      <Button
+                        type="button"
+                        className="inline-flex items-center py-2 px-3 border border-transparent rounded-full bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        disabled={isLoading}
+                        onClick={() => sendInviteToRegisteredUser(person.email)}
+                      >
+                        <PlusSmIcon
+                          className="-ml-1 mr-0.5 h-5 w-5 text-gray-400"
+                          aria-hidden="true"
+                        />
+                        <span className="text-sm font-medium text-gray-900">
+                          Invite <span className="sr-only">{person.name}</span>{" "}
+                        </span>
+                      </Button>
+                    </div>
+                  </li>
+                ))}
+            </ul>
+          </div>
+        )}
       </div>
     </Modal>
   );

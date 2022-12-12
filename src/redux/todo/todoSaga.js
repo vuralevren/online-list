@@ -1,5 +1,10 @@
 import _ from "lodash";
 import { all, call, put, select, takeLatest } from "redux-saga/effects";
+import { clientKey } from "../../configs/altogic";
+import { EventType } from "../../helpers/useRealtime";
+import { TodoStatusTypes } from "../../helpers/utils";
+import { listActions } from "../list/listSlice";
+import realtimeService from "../realtime/realtimeService";
 import todoService from "./todoService";
 import { todoActions } from "./todoSlice";
 
@@ -23,8 +28,8 @@ function* getTodosSaga({
       }
       let newTodos = {};
 
-      if (!_.isEmpty(todos?.data)) {
-        for (const todo of todos?.data) {
+      if (!_.isEmpty(todos?.result)) {
+        for (const todo of todos?.result) {
           newTodos[todo._id] = todo;
         }
       }
@@ -38,7 +43,7 @@ function* getTodosSaga({
           page,
         })
       );
-      yield put(todoActions.setInfo(todos?.info));
+      yield put(todoActions.setInfo(todos?.countInfo));
     }
 
     if (_.isFunction(onSuccess)) onSuccess();
@@ -48,7 +53,9 @@ function* getTodosSaga({
   }
 }
 
-function* createTodoSaga({ payload: { body, onSuccess, onFailure } }) {
+function* createTodoSaga({
+  payload: { body, workspaceSlug, listSlug, status, onSuccess, onFailure },
+}) {
   try {
     const { data: createdTodo, errors } = yield call(
       todoService.createTodo,
@@ -64,7 +71,21 @@ function* createTodoSaga({ payload: { body, onSuccess, onFailure } }) {
         value: createdTodo,
       })
     );
+    yield put(
+      listActions.setTodoSize({
+        key: createdTodo?.listSlug,
+        type: "increase",
+      })
+    );
 
+    const realtimeKey = yield select(({ auth }) => auth.realtimeKey);
+    realtimeService.sendMessage(clientKey, EventType.NEW_TODO, {
+      sent: realtimeKey,
+      workspace: workspaceSlug,
+      list: listSlug,
+      status,
+      data: createdTodo,
+    });
     if (_.isFunction(onSuccess)) onSuccess();
   } catch (e) {
     console.log(e);
@@ -72,7 +93,9 @@ function* createTodoSaga({ payload: { body, onSuccess, onFailure } }) {
   }
 }
 
-function* updateTodoSaga({ payload: { body, onSuccess, onFailure } }) {
+function* updateTodoSaga({
+  payload: { body, workspaceSlug, listSlug, status, onSuccess, onFailure },
+}) {
   try {
     const { data: updatedTodo, errors } = yield call(
       todoService.updateTodo,
@@ -89,6 +112,14 @@ function* updateTodoSaga({ payload: { body, onSuccess, onFailure } }) {
       })
     );
 
+    const realtimeKey = yield select(({ auth }) => auth.realtimeKey);
+    realtimeService.sendMessage(clientKey, EventType.UPDATE_TODO, {
+      sent: realtimeKey,
+      workspace: workspaceSlug,
+      list: listSlug,
+      status,
+      data: updatedTodo,
+    });
     if (_.isFunction(onSuccess)) onSuccess();
   } catch (e) {
     console.log(e);
@@ -123,9 +154,84 @@ function* updateFieldsTodoSaga({
   }
 }
 
-function* deleteTodoSaga({ payload: { todoId, onSuccess, onFailure } }) {
+function* changeStatusTodoSaga({
+  payload: {
+    todoId,
+    newStatus,
+    listSlug,
+    workspaceSlug,
+    currentStatus,
+    onSuccess,
+    onFailure,
+  },
+}) {
   try {
-    const { errors } = yield call(todoService.deleteTodo, todoId);
+    const { data: updatedTodo, errors } = yield call(
+      todoService.changeStatusTodo,
+      todoId,
+      newStatus
+    );
+    if (errors) {
+      throw errors;
+    }
+
+    yield put(
+      todoActions.updateTodos({
+        key: updatedTodo?._id,
+        value: updatedTodo,
+      })
+    );
+    if (updatedTodo.status === TodoStatusTypes.TODO) {
+      yield put(
+        listActions.setTodoSize({
+          key: updatedTodo?.listSlug,
+          type: "increase",
+        })
+      );
+      yield put(
+        listActions.setCompletedSize({
+          key: updatedTodo?.listSlug,
+          type: "decrease",
+        })
+      );
+    } else {
+      yield put(
+        listActions.setTodoSize({
+          key: updatedTodo?.listSlug,
+          type: "decrease",
+        })
+      );
+      yield put(
+        listActions.setCompletedSize({
+          key: updatedTodo?.listSlug,
+          type: "increase",
+        })
+      );
+    }
+
+    const realtimeKey = yield select(({ auth }) => auth.realtimeKey);
+    realtimeService.sendMessage(clientKey, EventType.CHANGE_STATUS_TODO, {
+      sent: realtimeKey,
+      workspace: workspaceSlug,
+      list: listSlug,
+      status: currentStatus,
+      data: updatedTodo,
+    });
+    if (_.isFunction(onSuccess)) onSuccess();
+  } catch (e) {
+    console.log(e);
+    if (_.isFunction(onFailure)) onFailure(e);
+  }
+}
+
+function* deleteTodoSaga({
+  payload: { todoId, workspaceSlug, onSuccess, onFailure },
+}) {
+  try {
+    const { data: deletedTodo, errors } = yield call(
+      todoService.deleteTodo,
+      todoId
+    );
     if (errors) {
       throw errors;
     }
@@ -136,6 +242,30 @@ function* deleteTodoSaga({ payload: { todoId, onSuccess, onFailure } }) {
       })
     );
 
+    if (deletedTodo.status === TodoStatusTypes.TODO) {
+      yield put(
+        listActions.setTodoSize({
+          key: deletedTodo?.listSlug,
+          type: "decrease",
+        })
+      );
+    } else {
+      yield put(
+        listActions.setCompletedSize({
+          key: deletedTodo?.listSlug,
+          type: "decrease",
+        })
+      );
+    }
+
+    const realtimeKey = yield select(({ auth }) => auth.realtimeKey);
+    realtimeService.sendMessage(clientKey, EventType.DELETE_TODO, {
+      sent: realtimeKey,
+      workspace: workspaceSlug,
+      list: deletedTodo?.listSlug,
+      status: deletedTodo?.status,
+      data: deletedTodo,
+    });
     if (_.isFunction(onSuccess)) onSuccess();
   } catch (e) {
     console.log(e);
@@ -149,6 +279,7 @@ export default function* rootSaga() {
     takeLatest(todoActions.createTodoRequest.type, createTodoSaga),
     takeLatest(todoActions.updateTodoRequest.type, updateTodoSaga),
     takeLatest(todoActions.updateFieldsTodoRequest.type, updateFieldsTodoSaga),
+    takeLatest(todoActions.changeStatusTodoRequest.type, changeStatusTodoSaga),
     takeLatest(todoActions.deleteTodoRequest.type, deleteTodoSaga),
   ]);
 }

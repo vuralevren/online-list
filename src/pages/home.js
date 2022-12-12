@@ -8,8 +8,11 @@ import { useNavigate, useParams } from "react-router-dom";
 import { workspaceActions } from "../redux/workspace/workspaceSlice";
 import { listActions } from "../redux/list/listSlice";
 import Empty from "../components/empty";
+import useListenRealtime from "../helpers/useRealtime";
+import _ from "lodash";
 
 export default function Home() {
+  useListenRealtime();
   const { workspaceSlug, listSlug } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -29,6 +32,21 @@ export default function Home() {
         workspaceActions.getWorkspaceListBySlugRequest({
           userId: user?._id,
           slug: workspaceSlug,
+          onSuccess: () => {
+            dispatch(
+              workspaceActions.getIsMemberWorkspaceRequest({
+                slug: workspaceSlug,
+                onSuccess: (isMember) => {
+                  if (!isMember) {
+                    navigate("/");
+                  }
+                },
+                onFailure: () => {
+                  navigate("/");
+                },
+              })
+            );
+          },
           onFailure: () => {
             navigate("/");
           },
@@ -43,16 +61,11 @@ export default function Home() {
         <>
           <Tabs settingsOnClick={showSideList} />
           <ListTable />
-
-          <ListSideModal
-            show={showList}
-            setShow={setShowList}
-            newList={newList}
-          />
         </>
       ) : (
         <Empty message="Select or add a list." />
       )}
+      <ListSideModal show={showList} setShow={setShowList} newList={newList} />
     </Template>
   );
 }

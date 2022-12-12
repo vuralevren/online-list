@@ -20,6 +20,7 @@ export default function Tabs({ settingsOnClick }) {
   const workspace = useSelector(({ workspace }) =>
     _.get(workspace.workspaceList, workspaceSlug)
   );
+  const list = useSelector(({ list }) => _.get(list.lists, listSlug));
   const selectedStatus = useSelector(({ todo }) => todo.selectedStatus);
 
   const setSelectedStatus = (index) => {
@@ -34,20 +35,14 @@ export default function Tabs({ settingsOnClick }) {
     <div className="relative pb-5 sm:pb-0 mb-4">
       <div className="flex justify-between items-center">
         <h3 className="flex items-center text-lg leading-6 font-medium text-gray-900">
-          <AvatarList
-            users={workspace?.userProfilePictures}
-            totalSize={workspace?.userSize}
-          />
-          <AccessBadge isPublic={workspace?.isPublic} />
-        </h3>
-        <div className="flex md:mt-0 justify-end">
-          <Button onClick={settingsOnClick}>
-            <CogIcon
-              className="w-6 ml-2 text-indigo-800 cursor-pointer"
-              aria-hidden="true"
+          {list && !list.isPublic && (
+            <AvatarList
+              users={workspace?.userProfilePictures}
+              totalSize={workspace?.userSize}
             />
-          </Button>
-        </div>
+          )}
+          <AccessBadge isPublic={list?.isPublic} />
+        </h3>
       </div>
       <div className="mt-4">
         <Tab.Group
@@ -69,7 +64,7 @@ export default function Tabs({ settingsOnClick }) {
                 )}
               >
                 <span>Todo</span>
-                {/* {23 ? (
+                {list?.todoSize ? (
                   <span
                     className={cs(
                       status !== TodoStatusTypes.COMPLETED
@@ -78,9 +73,9 @@ export default function Tabs({ settingsOnClick }) {
                       "hidden ml-2 py-0.5 px-2.5 rounded-full text-xs font-medium md:inline-block"
                     )}
                   >
-                    {23}
+                    {list?.todoSize}
                   </span>
-                ) : null} */}
+                ) : null}
               </Tab>
             </Link>
             <Link
@@ -97,7 +92,7 @@ export default function Tabs({ settingsOnClick }) {
                 )}
               >
                 <span>Completed</span>
-                {/* {23 ? (
+                {list?.completedSize ? (
                   <span
                     className={cs(
                       status === TodoStatusTypes.COMPLETED
@@ -106,9 +101,9 @@ export default function Tabs({ settingsOnClick }) {
                       "hidden ml-2 py-0.5 px-2.5 rounded-full text-xs font-medium md:inline-block"
                     )}
                   >
-                    {23}
+                    {list?.completedSize}
                   </span>
-                ) : null} */}
+                ) : null}
               </Tab>
             </Link>
           </Tab.List>

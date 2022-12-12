@@ -35,7 +35,7 @@ export default function JoinRedirect() {
     if (user) {
       joinWorkspace();
     } else {
-      if (isExist) navigate(myRouter.SIGN_IN(email, workspaceId));
+      if (isExist === "true") navigate(myRouter.SIGN_IN(email, workspaceId));
       else navigate(myRouter.CREATE_AN_ACCOUNT(email, workspaceId));
     }
   }, []);

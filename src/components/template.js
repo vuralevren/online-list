@@ -1,106 +1,63 @@
 import { Dialog, Menu, Transition } from "@headlessui/react";
 import {
-  CogIcon,
   LinkIcon,
-  LockClosedIcon,
   MenuAlt2Icon,
   UserAddIcon,
-  UsersIcon,
   XIcon,
 } from "@heroicons/react/outline";
 import cs from "classnames";
+import { Fragment, useState } from "react";
 import _ from "lodash";
-import { Fragment, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import Button from "../components/button";
 import Logo from "../components/logo";
-import functions from "../helpers/functions";
 import { myRouter } from "../helpers/routes";
 import { authActions } from "../redux/auth/authSlice";
 import { listActions } from "../redux/list/listSlice";
 import Avatar from "./avatar";
 import Container from "./container";
-import ListObserver from "./list-observer";
 import AddTeamMembersModal from "./modals/add-team-members-modal";
+import DeleteModal from "./modals/delete-modal";
 import InfoModal from "./modals/info-modal";
 import TeamSideModal from "./modals/team-side-modal";
-import useArraySelector from "../helpers/useArraySelector";
+import NavigationList from "./navigation-list";
 
-export default function Sidebar({ newButtonOnClick, children }) {
+export default function Template({ newButtonOnClick, children }) {
   const { workspaceSlug, listSlug } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
-  const lists = useArraySelector(({ list }) => list.lists);
 
   const [openInfoModal, setOpenInfoModal] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [addMembersShow, setAddMembersShow] = useState(false);
   const [teamShow, setTeamShow] = useState(false);
+  const [deletedList, setDeletedList] = useState(null);
+
+  const list = useSelector(({ list }) => _.get(list.lists, listSlug));
+
+  const deleteList = () => {
+    dispatch(
+      listActions.deleteListRequest({
+        listId: deletedList?._id,
+        listSlug: deletedList?.slug,
+        workspaceSlug,
+        onSuccess: (slug) => {
+          if (deletedList?.slug === listSlug) {
+            navigate(myRouter.HOME(workspaceSlug));
+          }
+          toast.success("List removed successfully");
+          setDeletedList(null);
+        },
+      })
+    );
+  };
 
   const copyCode = () => {
     toast.success("List link was copied.");
     const url = window.location;
     navigator.clipboard.writeText(url);
-  };
-
-  useEffect(() => {
-    if (!_.isEmpty(lists)) {
-      getLists("", true);
-    }
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      dispatch(listActions.setInfo(null));
-    };
-  }, []);
-
-  const getLists = (searchText, isNewSearch = false) => {
-    dispatch(
-      listActions.getListsRequest({
-        workspaceSlug,
-        // isMember,
-        searchText: searchText || isNewSearch ? searchText.trim() : null,
-        isNewSearch,
-      })
-    );
-  };
-
-  const getNavigations = () => {
-    return (
-      <ListObserver onEnd={getLists}>
-        {_.map(lists, (list) => (
-          <Link
-            key={list?.slug}
-            to={myRouter.HOME(workspaceSlug, list?.slug)}
-            onClick={() => sidebarOpen(false)}
-            className={cs(
-              list?.slug === listSlug
-                ? "bg-indigo-800 text-white"
-                : "text-indigo-100 hover:bg-indigo-600",
-              "group flex items-center px-2 py-2 text-sm font-medium rounded-md"
-            )}
-          >
-            {list?.isPublic ? (
-              <UsersIcon
-                className="mr-3 flex-shrink-0 h-6 w-6 text-indigo-300"
-                aria-hidden="true"
-              />
-            ) : (
-              <LockClosedIcon
-                className="mr-3 flex-shrink-0 h-6 w-6 text-indigo-300"
-                aria-hidden="true"
-              />
-            )}
-
-            {functions.convertToTitle(list?.name)}
-          </Link>
-        ))}
-      </ListObserver>
-    );
   };
 
   const newButton = () => {
@@ -176,7 +133,13 @@ export default function Sidebar({ newButtonOnClick, children }) {
                   </div>
                 </Link>
                 <div className="mt-5 flex-1 h-0 overflow-y-auto">
-                  <nav className="px-2 space-y-1">{getNavigations()}</nav>
+                  <nav className="px-2 space-y-1">
+                    <NavigationList
+                      setSidebarOpen={setSidebarOpen}
+                      deletedList={deletedList}
+                      setDeletedList={setDeletedList}
+                    />
+                  </nav>
                 </div>
                 <div className="border-t border-indigo-800 p-4">
                   {newButton()}
@@ -196,7 +159,11 @@ export default function Sidebar({ newButtonOnClick, children }) {
             </Link>
             <div className="mt-5 flex-1 flex flex-col">
               <nav className="flex-1 px-2 pb-4 space-y-1">
-                {getNavigations()}
+                <NavigationList
+                  setSidebarOpen={setSidebarOpen}
+                  deletedList={deletedList}
+                  setDeletedList={setDeletedList}
+                />
               </nav>
             </div>
             <div className="border-t border-indigo-800 p-4">{newButton()}</div>
@@ -215,31 +182,26 @@ export default function Sidebar({ newButtonOnClick, children }) {
             <div className="flex-1 px-4 flex justify-between items-center">
               <span className="text-xl font-semibold text-gray-900" />
               <div className="ml-4 flex items-center md:ml-6">
-                <button
-                  type="button"
-                  className="-m-2.5 w-10 h-10 rounded-full inline-flex items-center justify-center text-gray-400 hover:text-gray-500"
-                  onClick={() => setAddMembersShow(true)}
-                >
-                  <span className="sr-only">Info</span>
-                  <UserAddIcon className="h-5 w-5" aria-hidden="true" />
-                </button>
-                <button
-                  type="button"
-                  className="w-10 h-10 rounded-full inline-flex items-center justify-center text-gray-400 hover:text-gray-500"
-                  onClick={copyCode}
-                >
-                  <span className="sr-only">Info</span>
-                  <LinkIcon className="h-5 w-5" aria-hidden="true" />
-                </button>
-                {/* {league?.owner !== user?._id && ( */}
-                <Link
-                  to={myRouter.SETTINGS_WORKSPACE(workspaceSlug)}
-                  className="-m-2.5 w-10 h-10 rounded-full inline-flex items-center justify-center text-gray-400 hover:text-gray-500"
-                >
-                  <span className="sr-only">Settings</span>
-                  <CogIcon className="h-5 w-5" aria-hidden="true" />
-                </Link>
-                {/* )} */}
+                {list && !list.isPublic && (
+                  <button
+                    type="button"
+                    className="w-10 h-10 rounded-full inline-flex items-center justify-center text-gray-400 hover:text-gray-500"
+                    onClick={() => setAddMembersShow(true)}
+                  >
+                    <span className="sr-only">Add Member</span>
+                    <UserAddIcon className="h-5 w-5" aria-hidden="true" />
+                  </button>
+                )}
+                {list && (
+                  <button
+                    type="button"
+                    className="-m-2.5 w-10 h-10 rounded-full inline-flex items-center justify-center text-gray-400 hover:text-gray-500"
+                    onClick={copyCode}
+                  >
+                    <span className="sr-only">Info</span>
+                    <LinkIcon className="h-5 w-5" aria-hidden="true" />
+                  </button>
+                )}
                 {/* Profile dropdown */}
                 <Menu as="div" className="ml-3 relative">
                   <div>
@@ -303,11 +265,21 @@ export default function Sidebar({ newButtonOnClick, children }) {
           </main>
         </div>
         <InfoModal open={openInfoModal} setOpen={setOpenInfoModal} />
-        <AddTeamMembersModal
-          show={addMembersShow}
-          setShow={setAddMembersShow}
-        />
+        {addMembersShow && (
+          <AddTeamMembersModal
+            show={addMembersShow}
+            setShow={setAddMembersShow}
+          />
+        )}
         <TeamSideModal show={teamShow} setShow={setTeamShow} />
+        {deletedList && (
+          <DeleteModal
+            title="Remove List"
+            description="Are you sure you would like to remove this list?"
+            setDeleteModal={() => setDeletedList(null)}
+            clickDelete={deleteList}
+          />
+        )}
       </div>
     </>
   );
