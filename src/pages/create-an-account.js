@@ -129,6 +129,7 @@ export default function CreateAnAccount() {
                     id="email"
                     name="email"
                     placeholder="johndoe@example.com"
+                    disabled={!_.isNil(emailQuery)}
                     register={register("email")}
                     error={errors.email}
                   />

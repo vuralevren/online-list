@@ -1,5 +1,13 @@
 import _ from "lodash";
-import { all, call, fork, put, select, takeLatest } from "redux-saga/effects";
+import {
+  all,
+  call,
+  debounce,
+  fork,
+  put,
+  select,
+  takeLatest,
+} from "redux-saga/effects";
 import { deleteFileSaga, uploadFileSaga } from "../file/fileSaga";
 import invitationService from "../invitation/invitationService";
 import authService from "./authService";
@@ -310,11 +318,13 @@ function* isEmailExistSaga({ payload: { email, onSuccess, onFailure } }) {
 }
 
 function* searchEmailOrNameSaga({
-  payload: { searchText, onSuccess, onFailure },
+  payload: { userId, workspaceId, searchText, onSuccess, onFailure },
 }) {
   try {
     const { data, errors } = yield call(
-      authService.searchEmailOrName,
+      authService.search,
+      userId,
+      workspaceId,
       searchText
     );
     if (errors) {
@@ -354,7 +364,8 @@ export default function* rootSaga() {
     takeLatest(authActions.resetPasswordRequest.type, resetPasswordSaga),
     takeLatest(authActions.updateNameRequest.type, updateNameSaga),
     takeLatest(authActions.isEmailExistRequest.type, isEmailExistSaga),
-    takeLatest(
+    debounce(
+      800,
       authActions.searchEmailOrNameRequest.type,
       searchEmailOrNameSaga
     ),

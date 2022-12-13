@@ -6,6 +6,9 @@ const realtimeService = {
   listen: (eventType, callback) => realtime.on(eventType, callback),
   sendMessage: (channel, event, message) =>
     realtime.send(channel, event, message),
+
+  isConnected: () => realtime.isConnected(),
+  open: () => realtime.open(),
 };
 
 export default realtimeService;

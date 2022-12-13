@@ -9,7 +9,7 @@ export default function AvatarList({ users, totalSize }) {
       {_.map(members, (user, index) => (
         <div key={`${user.userName}-${index}`}>
           <Avatar
-            size={8}
+            size={10}
             anotherUser={{
               name: user.userName,
               profilePicture: user.profilePicture,
@@ -19,7 +19,7 @@ export default function AvatarList({ users, totalSize }) {
       ))}
       {totalSize > 4 && (
         <Avatar
-          size={8}
+          size={10}
           anotherUser={{
             name: `+${totalSize}`,
           }}

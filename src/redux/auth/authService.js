@@ -56,6 +56,25 @@ const authService = {
   searchEmailOrName(searchText) {
     return endpoint.get("/user/search", { searchText });
   },
+  search(userId, workspaceId, searchText) {
+    console.log("burdayıss");
+    return db
+      .model("users")
+      .lookup({
+        modelName: "invitations",
+        name: "isSent",
+        query: `lookup.workspace == '${workspaceId}' && lookup.email == this.email`,
+      })
+      .lookup({
+        modelName: "user_workspace_connections",
+        name: "isMember",
+        query: `lookup.workspace == '${workspaceId}' && lookup.user == this._id`,
+      })
+      .filter(
+        `(INCLUDES(name, '${searchText}') || INCLUDES(email, '${searchText}')) && _id != '${userId}' && !EXISTS(isMember) && !EXISTS(isSent)`
+      )
+      .get();
+  },
 };
 
 export default authService;

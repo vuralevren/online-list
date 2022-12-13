@@ -110,6 +110,7 @@ export default function SignIn() {
                     label="Email"
                     id="email"
                     name="email"
+                    disabled={!_.isNil(emailQuery)}
                     register={register("email")}
                     error={errors.email}
                     placeholder="johndoe@example.com"

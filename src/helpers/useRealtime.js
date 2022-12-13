@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { clientKey } from "../configs/altogic";
@@ -25,6 +25,7 @@ export const EventType = {
 
 export default function useListenRealtime() {
   const { workspaceSlug, listSlug } = useParams();
+  console.log({ listSlug });
   const statusSlug = useQuery("status");
   const currentStatus =
     statusSlug === TodoStatusTypes.COMPLETED
@@ -36,6 +37,9 @@ export default function useListenRealtime() {
 
   const user = useSelector(({ auth }) => auth.user);
   const realtimeKey = useSelector(({ auth }) => auth.realtimeKey);
+  // const [socketConnected, setSocketConnected] = useState(
+  //   realtimeService.isConnected()
+  // );
 
   const newList = ({ message }) => {
     const { sent, workspace, data } = message;
@@ -155,6 +159,15 @@ export default function useListenRealtime() {
 
   const changeStatusTodo = ({ message }) => {
     const { sent, workspace, list, data } = message;
+    console.log("gelen message", {
+      sent,
+      workspace,
+      list,
+      data,
+      realtimeKey,
+      workspaceSlug,
+      listSlug,
+    });
     if (
       realtimeKey === sent ||
       workspace !== workspaceSlug ||
@@ -252,5 +265,5 @@ export default function useListenRealtime() {
     return () => {
       realtimeService.leave(clientKey);
     };
-  }, []);
+  }, [workspaceSlug, listSlug]);
 }

@@ -79,6 +79,7 @@ function* createTodoSaga({
     );
 
     const realtimeKey = yield select(({ auth }) => auth.realtimeKey);
+    console.log({ realtimeKey });
     realtimeService.sendMessage(clientKey, EventType.NEW_TODO, {
       sent: realtimeKey,
       workspace: workspaceSlug,
@@ -210,6 +211,16 @@ function* changeStatusTodoSaga({
     }
 
     const realtimeKey = yield select(({ auth }) => auth.realtimeKey);
+
+    console.log("sent message", {
+      channel: clientKey,
+      eventType: EventType.CHANGE_STATUS_TODO,
+      sent: realtimeKey,
+      workspace: workspaceSlug,
+      list: listSlug,
+      status: currentStatus,
+      data: updatedTodo,
+    });
     realtimeService.sendMessage(clientKey, EventType.CHANGE_STATUS_TODO, {
       sent: realtimeKey,
       workspace: workspaceSlug,

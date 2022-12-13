@@ -44,13 +44,13 @@ export default function AddTeamMembersModal({ show, setShow }) {
     setSearchText(_.trim(value));
 
     if (_.size(value) > 2) {
-      _.debounce(() => {
-        dispatch(
-          authActions.searchEmailOrNameRequest({
-            searchText,
-          })
-        );
-      }, 500)();
+      dispatch(
+        authActions.searchEmailOrNameRequest({
+          userId: user?._id,
+          workspaceId: workspace?._id,
+          searchText,
+        })
+      );
     }
   };
 
