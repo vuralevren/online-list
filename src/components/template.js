@@ -23,6 +23,7 @@ import DeleteModal from "./modals/delete-modal";
 import InfoModal from "./modals/info-modal";
 import TeamSideModal from "./modals/team-side-modal";
 import NavigationList from "./navigation-list";
+import classNames from "classnames";
 
 export default function Template({ newButtonOnClick, children }) {
   const { workspaceSlug, listSlug } = useParams();
@@ -182,10 +183,13 @@ export default function Template({ newButtonOnClick, children }) {
             <div className="flex-1 px-4 flex justify-between items-center">
               <span className="text-xl font-semibold text-gray-900" />
               <div className="ml-4 flex items-center md:ml-6">
-                {list && !list.isPublic && (
+                {(!list || (list && !list.isPublic)) && (
                   <button
                     type="button"
-                    className="w-10 h-10 rounded-full inline-flex items-center justify-center text-gray-400 hover:text-gray-500"
+                    className={classNames([
+                      "w-10 h-10 rounded-full inline-flex items-center justify-center text-gray-400 hover:text-gray-500",
+                      !list && "-m-2.5",
+                    ])}
                     onClick={() => setAddMembersShow(true)}
                   >
                     <span className="sr-only">Add Member</span>

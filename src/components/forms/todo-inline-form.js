@@ -148,7 +148,7 @@ export default function TodoInlineForm({
         placeholder={create && "Create Todo"}
         autoMargin={false}
         newStyle
-        autoFocus
+        autoFocus={!create}
         register={register("title")}
         error={errors.title}
       />

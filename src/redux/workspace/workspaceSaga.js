@@ -1,5 +1,8 @@
 import _ from "lodash";
 import { all, call, put, select, takeLatest, fork } from "redux-saga/effects";
+import { clientKey } from "../../configs/altogic";
+import { EventType } from "../../helpers/useRealtime";
+import realtimeService from "../realtime/realtimeService";
 import workspaceService from "./workspaceService";
 import { workspaceActions } from "./workspaceSlice";
 
@@ -140,6 +143,15 @@ function* updateWorkspaceSaga({
         value: updatedWorkspace,
       })
     );
+
+    if (slugChanged) {
+      const realtimeKey = yield select(({ auth }) => auth.realtimeKey);
+      realtimeService.sendMessage(clientKey, EventType.WORKSPACE_NAME_CHANGED, {
+        sent: realtimeKey,
+        workspace: slug,
+        data: updatedWorkspace,
+      });
+    }
     if (_.isFunction(onSuccess))
       onSuccess(slugChanged, updatedWorkspace.workspaceSlug);
   } catch (e) {

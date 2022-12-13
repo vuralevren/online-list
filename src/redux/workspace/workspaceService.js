@@ -16,7 +16,7 @@ const workspaceService = {
   getWorkspaceBySlug(userId, slug) {
     return db
       .model("user_workspace_connections")
-      .filter(`user == '${userId}' && workspaceSlug == '${slug}'`)
+      .filter(`user == '${userId}' && workspaceSlug == "${slug}"`)
       .lookup({ field: "workspace" })
       .getSingle();
   },
@@ -30,7 +30,7 @@ const workspaceService = {
     return endpoint.delete("/workspace", { workspaceId });
   },
   getWorkspaceMembers({ workspaceSlug, searchText, page = 1, limit = 12 }) {
-    let query = `workspaceSlug == '${workspaceSlug}'`;
+    let query = `workspaceSlug == "${workspaceSlug}"`;
     if (searchText)
       query += ` && INCLUDES(TOLOWER(user.name), TOLOWER('${searchText}'))`;
     return db

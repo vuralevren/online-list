@@ -12,6 +12,7 @@ export const listSlice = createSlice({
   initialState,
   reducers: {
     getListsRequest() {},
+    getListBySlugRequest() {},
     createListRequest() {},
     deleteListRequest() {},
     updateListRequest() {},

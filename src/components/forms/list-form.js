@@ -41,6 +41,7 @@ export default function ListForm({ newList, setShow }) {
   );
   const list = useSelector(({ list }) => _.get(list.lists, listSlug));
   const dispatch = useDispatch();
+  const user = useSelector(({ auth }) => auth.user);
   const [isPublic, setIsPublic] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -152,7 +153,7 @@ export default function ListForm({ newList, setShow }) {
           <RadioToggle
             label="Public"
             enabled={isPublic}
-            disabled={!workspace?.isPublic}
+            disabled={!workspace?.isPublic || !user?._id}
             setEnabled={setIsPublic}
           />
         )}

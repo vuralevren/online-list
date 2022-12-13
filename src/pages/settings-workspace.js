@@ -310,7 +310,13 @@ export default function SettingsWorkspace() {
                   <tr className="group group-hover:bg-gray-50" key={member._id}>
                     <td className="relative px-6 py-5 flex items-center space-x-3 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500">
                       <div className="flex-shrink-0">
-                        <Avatar size={10} />
+                        <Avatar
+                          size={10}
+                          anotherUser={{
+                            name: member.name,
+                            profilePicture: member.profilePicture,
+                          }}
+                        />
                       </div>
                       <div className="flex-1 min-w-0">
                         <span className="absolute inset-0" aria-hidden="true" />

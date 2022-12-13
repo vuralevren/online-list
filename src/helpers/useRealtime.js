@@ -11,6 +11,8 @@ import { TodoStatusTypes } from "./utils";
 import { todoActions } from "../redux/todo/todoSlice";
 
 export const EventType = {
+  WORKSPACE_NAME_CHANGED: "WORKSPACE_NAME_CHANGED",
+
   NEW_LIST: "NEW_LIST",
   UPDATE_LIST: "UPDATE_LIST",
   DELETE_LIST: "DELETE_LIST",
@@ -63,6 +65,13 @@ export default function useListenRealtime() {
         })
       );
     }
+  };
+
+  const workspaceNameChange = ({ message }) => {
+    const { sent, workspace, data } = message;
+    if (realtimeKey === sent || workspace !== workspaceSlug) return;
+
+    navigate(myRouter.HOME(data?.workspaceSlug));
   };
 
   const updateList = ({ message }) => {
@@ -222,6 +231,10 @@ export default function useListenRealtime() {
   };
 
   const listen = () => {
+    realtimeService.listen(
+      EventType.WORKSPACE_NAME_CHANGED,
+      workspaceNameChange
+    );
     realtimeService.listen(EventType.NEW_LIST, newList);
     realtimeService.listen(EventType.UPDATE_LIST, updateList);
     realtimeService.listen(EventType.DELETE_LIST, deleteList);

@@ -32,21 +32,6 @@ export default function Home() {
         workspaceActions.getWorkspaceListBySlugRequest({
           userId: user?._id,
           slug: workspaceSlug,
-          onSuccess: () => {
-            dispatch(
-              workspaceActions.getIsMemberWorkspaceRequest({
-                slug: workspaceSlug,
-                onSuccess: (isMember) => {
-                  if (!isMember) {
-                    navigate("/");
-                  }
-                },
-                onFailure: () => {
-                  navigate("/");
-                },
-              })
-            );
-          },
           onFailure: () => {
             navigate("/");
           },
@@ -54,6 +39,20 @@ export default function Home() {
       );
     }
   }, [workspaceSlug]);
+
+  useEffect(() => {
+    if (listSlug) {
+      dispatch(
+        listActions.getListBySlugRequest({
+          userId: user?._id,
+          listSlug,
+          onFailure: () => {
+            navigate("/");
+          },
+        })
+      );
+    }
+  }, [listSlug]);
 
   return (
     <Template newButtonOnClick={showSideList}>

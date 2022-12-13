@@ -73,6 +73,32 @@ function* getListsSaga({
   }
 }
 
+function* getListBySlugSaga({
+  payload: { listSlug, userId, onSuccess, onFailure },
+}) {
+  try {
+    const { data, errors } = yield call(
+      listService.getListBySlug,
+      listSlug,
+      userId
+    );
+    if (errors) {
+      throw errors;
+    }
+
+    yield put(
+      listActions.updateLists({
+        key: data.slug,
+        value: data,
+      })
+    );
+
+    if (_.isFunction(onSuccess)) onSuccess();
+  } catch (e) {
+    if (_.isFunction(onFailure)) onFailure(e);
+  }
+}
+
 function* createListSaga({
   payload: { body, workspaceSlug, onSuccess, onFailure },
 }) {
@@ -171,6 +197,7 @@ function* updateListSaga({
 export default function* rootSaga() {
   yield all([
     takeLatest(listActions.getListsRequest.type, getListsSaga),
+    takeLatest(listActions.getListBySlugRequest.type, getListBySlugSaga),
     takeLatest(listActions.createListRequest.type, createListSaga),
     takeLatest(listActions.deleteListRequest.type, deleteListSaga),
     takeLatest(listActions.updateListRequest.type, updateListSaga),
