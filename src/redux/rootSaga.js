@@ -4,7 +4,6 @@ import authSaga from "./auth/authSaga";
 import workspaceSaga from "./workspace/workspaceSaga";
 import listSaga from "./list/listSaga";
 import invitationSaga from "./invitation/invitationSaga";
-import realtimeSaga from "./realtime/realtimeSaga";
 import todoSaga from "./todo/todoSaga";
 
 function* rootSaga() {
@@ -13,7 +12,6 @@ function* rootSaga() {
     fork(workspaceSaga),
     fork(listSaga),
     fork(invitationSaga),
-    fork(realtimeSaga),
     fork(todoSaga),
   ]);
 }

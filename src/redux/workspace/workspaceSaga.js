@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { all, call, put, select, takeLatest, fork } from "redux-saga/effects";
+import { all, call, put, select, takeLatest } from "redux-saga/effects";
 import { clientKey } from "../../configs/altogic";
 import { EventType } from "../../helpers/useRealtime";
 import realtimeService from "../realtime/realtimeService";

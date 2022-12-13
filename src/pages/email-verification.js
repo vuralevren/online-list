@@ -5,7 +5,6 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import AuthSidebar from "../components/auth-sidebar";
 import Button from "../components/button";
 import useQuery from "../helpers/useQuery";
 import { authActions } from "../redux/auth/authSlice";

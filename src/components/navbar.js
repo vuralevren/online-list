@@ -15,8 +15,6 @@ export default function Navbar() {
 
   const user = useSelector((state) => state.auth.user);
 
-  const hasLeague = user?.leagues && !_.isEmpty(user?.leagues);
-
   const logout = () => {
     dispatch(
       authActions.signOutRequest({ onSuccess: () => navigate("/sign-in") })
@@ -29,9 +27,7 @@ export default function Navbar() {
         <>
           <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
             <div className="relative flex items-center justify-between h-16">
-              <Link
-                to={hasLeague ? `/league/${_.first(user?.leagues).slug}` : "/"}
-              >
+              <Link to="/">
                 <div className="flex items-center px-2 lg:px-0 xl:w-64">
                   <div className="flex-shrink-0">
                     <Logo className="h-12 w-auto" />

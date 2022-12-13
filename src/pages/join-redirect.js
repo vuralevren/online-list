@@ -1,10 +1,8 @@
-import _ from "lodash";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { myRouter } from "../helpers/routes";
 import useQuery from "../helpers/useQuery";
-import { authActions } from "../redux/auth/authSlice";
 import { invitationActions } from "../redux/invitation/invitationSlice";
 
 export default function JoinRedirect() {

@@ -1,5 +1,4 @@
 import { Tab } from "@headlessui/react";
-import { CogIcon } from "@heroicons/react/outline";
 import cs from "classnames";
 import _ from "lodash";
 import { useDispatch, useSelector } from "react-redux";
@@ -10,7 +9,6 @@ import { TodoStatusTypes } from "../helpers/utils";
 import { todoActions } from "../redux/todo/todoSlice";
 import AccessBadge from "./access-badge";
 import AvatarList from "./avatar-list";
-import Button from "./button";
 
 export default function Tabs({ settingsOnClick }) {
   const { workspaceSlug, listSlug } = useParams();

@@ -1,7 +1,6 @@
 import { ArrowLeftIcon } from "@heroicons/react/outline";
 import { KeyIcon } from "@heroicons/react/solid";
 import { Link } from "react-router-dom";
-import AuthSidebar from "../components/auth-sidebar";
 import useQuery from "../helpers/useQuery";
 
 export default function ForgotPasswordEmail() {

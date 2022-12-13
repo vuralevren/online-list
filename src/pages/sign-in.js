@@ -8,7 +8,6 @@ import { useEffect, useState } from "react";
 import Logo from "../components/logo";
 import Button from "../components/button";
 import Input from "../components/inputs/input";
-import AuthSidebar from "../components/auth-sidebar";
 import { authActions } from "../redux/auth/authSlice";
 import { myRouter } from "../helpers/routes";
 import useQuery from "../helpers/useQuery";

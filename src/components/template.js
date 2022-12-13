@@ -20,8 +20,6 @@ import Avatar from "./avatar";
 import Container from "./container";
 import AddTeamMembersModal from "./modals/add-team-members-modal";
 import DeleteModal from "./modals/delete-modal";
-import InfoModal from "./modals/info-modal";
-import TeamSideModal from "./modals/team-side-modal";
 import NavigationList from "./navigation-list";
 import classNames from "classnames";
 
@@ -30,10 +28,8 @@ export default function Template({ newButtonOnClick, children }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const [openInfoModal, setOpenInfoModal] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [addMembersShow, setAddMembersShow] = useState(false);
-  const [teamShow, setTeamShow] = useState(false);
   const [deletedList, setDeletedList] = useState(null);
 
   const list = useSelector(({ list }) => _.get(list.lists, listSlug));
@@ -268,14 +264,12 @@ export default function Template({ newButtonOnClick, children }) {
             </Container>
           </main>
         </div>
-        <InfoModal open={openInfoModal} setOpen={setOpenInfoModal} />
         {addMembersShow && (
           <AddTeamMembersModal
             show={addMembersShow}
             setShow={setAddMembersShow}
           />
         )}
-        <TeamSideModal show={teamShow} setShow={setTeamShow} />
         {deletedList && (
           <DeleteModal
             title="Remove List"

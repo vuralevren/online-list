@@ -1,15 +1,14 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, useParams } from "react-router-dom";
+import Empty from "../components/empty";
 import ListTable from "../components/list-table";
 import ListSideModal from "../components/modals/list-side-modal";
 import Tabs from "../components/tabs";
 import Template from "../components/template";
-import { useNavigate, useParams } from "react-router-dom";
-import { workspaceActions } from "../redux/workspace/workspaceSlice";
-import { listActions } from "../redux/list/listSlice";
-import Empty from "../components/empty";
 import useListenRealtime from "../helpers/useRealtime";
-import _ from "lodash";
+import { listActions } from "../redux/list/listSlice";
+import { workspaceActions } from "../redux/workspace/workspaceSlice";
 
 export default function Home() {
   useListenRealtime();

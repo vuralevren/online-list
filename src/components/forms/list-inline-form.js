@@ -2,14 +2,13 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import _ from "lodash";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import * as yup from "yup";
 import functions from "../../helpers/functions";
 import { myRouter } from "../../helpers/routes";
 import { listActions } from "../../redux/list/listSlice";
-import Button from "../button";
 import Input from "../inputs/input";
 
 export default function ListInlineForm({ selectedList, setSelectedList }) {

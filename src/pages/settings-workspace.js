@@ -10,43 +10,13 @@ import Avatar from "../components/avatar";
 import Button from "../components/button";
 import Container from "../components/container";
 import Input from "../components/inputs/input";
-import RadioToggle from "../components/inputs/radio-toggle";
+import ListObserver from "../components/list-observer";
 import DeleteModal from "../components/modals/delete-modal";
 import Navbar from "../components/navbar";
 import functions from "../helpers/functions";
-import useQuery from "../helpers/useQuery";
-import { workspaceActions } from "../redux/workspace/workspaceSlice";
 import { myRouter } from "../helpers/routes";
 import useArraySelector from "../helpers/useArraySelector";
-import ListObserver from "../components/list-observer";
-import Empty from "../components/empty";
-
-const leagueTeams = [
-  {
-    name: "Evren",
-    user: {
-      name: "asdddd",
-    },
-  },
-  {
-    name: "Evren",
-    user: {
-      name: "asdddd",
-    },
-  },
-  {
-    name: "Evren",
-    user: {
-      name: "asdddd",
-    },
-  },
-  {
-    name: "Evren",
-    user: {
-      name: "asdddd",
-    },
-  },
-];
+import { workspaceActions } from "../redux/workspace/workspaceSlice";
 
 export default function SettingsWorkspace() {
   const schema = new yup.ObjectSchema({
@@ -83,7 +53,7 @@ export default function SettingsWorkspace() {
   const [searchText, setSearchText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [deletedMember, setDeletedMember] = useState(null);
-  const [deleteLeague, setDeleteLeague] = useState(false);
+  const [deletedWorkspace, setDeletedWorkspace] = useState(false);
 
   useEffect(() => {
     if (workspaceSlug) {
@@ -274,7 +244,7 @@ export default function SettingsWorkspace() {
               <div className="flex justify-center">
                 <Button
                   className="bg-red-600 border w-4/12 border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-md font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2"
-                  onClick={() => setDeleteLeague(true)}
+                  onClick={() => setDeletedWorkspace(true)}
                 >
                   Delete
                 </Button>
@@ -345,11 +315,11 @@ export default function SettingsWorkspace() {
               </tbody>
             </table>
           </ListObserver>
-          {deleteLeague && (
+          {deletedWorkspace && (
             <DeleteModal
               title="Delete Workspace"
               description="Are you sure you would like to delete workspace forever?"
-              setDeleteModal={() => setDeleteLeague(false)}
+              setDeleteModal={() => setDeletedWorkspace(false)}
               clickDelete={deleteWorkspace}
             />
           )}

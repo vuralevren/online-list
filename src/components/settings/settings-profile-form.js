@@ -25,7 +25,6 @@ export default function SettingsProfileForm() {
     formState: { errors },
     setValue,
     setError,
-    clearErrors,
   } = useForm({
     resolver: yupResolver(schema),
   });

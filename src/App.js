@@ -7,10 +7,8 @@ import _ from "lodash";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import * as ProtectedRoute from "./components/core/protected-route";
-import myRoutes from "./helpers/routes";
 import ScrollToTop from "./components/scroll-top";
-import JoinModal from "./components/modals/join-team-modal";
-import useListenRealtime from "./helpers/useRealtime";
+import myRoutes from "./helpers/routes";
 
 const store = makeStore();
 

@@ -1,9 +1,9 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import _ from "lodash";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import * as yup from "yup";
 import useQuery from "../../helpers/useQuery";
 import { TodoStatusTypes } from "../../helpers/utils";
@@ -35,7 +35,6 @@ export default function TodoForm({ selectedTodo, setSelectedTodo }) {
     resolver: yupResolver(schema),
   });
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const { listSlug, workspaceSlug } = useParams();
   const status = useQuery("status");
   const workspace = useSelector(({ workspace }) =>
@@ -43,7 +42,6 @@ export default function TodoForm({ selectedTodo, setSelectedTodo }) {
   );
   const list = useSelector(({ list }) => _.get(list.lists, listSlug));
 
-  const [isPublic, setIsPublic] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 

@@ -7,7 +7,6 @@ import { useDispatch } from "react-redux";
 import { useState } from "react";
 import { ArrowLeftIcon } from "@heroicons/react/outline";
 import { KeyIcon } from "@heroicons/react/solid";
-import AuthSidebar from "../components/auth-sidebar";
 import { authActions } from "../redux/auth/authSlice";
 import Button from "../components/button";
 import Input from "../components/inputs/input";

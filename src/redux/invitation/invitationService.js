@@ -1,4 +1,4 @@
-import { auth, db, endpoint } from "../../configs/altogic";
+import { endpoint } from "../../configs/altogic";
 
 const invitationService = {
   sendInvitation(workspaceId, email) {

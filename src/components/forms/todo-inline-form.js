@@ -4,7 +4,7 @@ import _ from "lodash";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import * as yup from "yup";
 import useQuery from "../../helpers/useQuery";
@@ -42,7 +42,6 @@ export default function TodoInlineForm({
   );
   const list = useSelector(({ list }) => _.get(list.lists, listSlug));
   const status = useQuery("status");
-  const navigate = useNavigate();
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
 

@@ -1,5 +1,4 @@
 import { PencilIcon, TrashIcon } from "@heroicons/react/outline";
-import classNames from "classnames";
 import _ from "lodash";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -11,10 +10,8 @@ import { TodoStatusTypes } from "../helpers/utils";
 import { todoActions } from "../redux/todo/todoSlice";
 import Button from "./button";
 import TodoInlineForm from "./forms/todo-inline-form";
-import Input from "./inputs/input";
 import ListObserver from "./list-observer";
 import DeleteModal from "./modals/delete-modal";
-import TodoSideModal from "./modals/todo-side-modal";
 
 export default function TodoList() {
   const status = useQuery("status");

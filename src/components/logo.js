@@ -5,7 +5,7 @@ export default function Logo({ className, w }) {
     <img
       className={className || `w-[${w || "192px"}] h-[120px] mb-6`}
       src={listLogo}
-      alt="Guess World Cup"
+      alt="List"
     />
   );
 }
