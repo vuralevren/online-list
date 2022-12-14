@@ -1,6 +1,5 @@
 import _ from "lodash";
-import { useSelector } from "react-redux";
-import { all, call, takeLatest, select, put } from "redux-saga/effects";
+import { all, call, put, select, takeLatest } from "redux-saga/effects";
 import { InvitationEventType } from "../../helpers/useInivitationRealtime";
 import { EventType } from "../../helpers/useRealtime";
 import realtimeService from "../realtime/realtimeService";
