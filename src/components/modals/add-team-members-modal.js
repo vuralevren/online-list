@@ -58,6 +58,7 @@ export default function AddTeamMembersModal({ show, setShow }) {
     dispatch(
       invitationActions.sendInvitationRequest({
         workspaceId: workspace?._id,
+        workspaceName: workspace?.name,
         email,
         onSuccess: () => {
           setIsLoading(false);

@@ -9,6 +9,7 @@ import "react-toastify/dist/ReactToastify.css";
 import * as ProtectedRoute from "./components/core/protected-route";
 import ScrollToTop from "./components/scroll-top";
 import myRoutes from "./helpers/routes";
+import WrapApp from "./components/core/wrap-app";
 
 const store = makeStore();
 
@@ -25,13 +26,19 @@ export default function App() {
               element={
                 route.needAuth ? (
                   <ProtectedRoute.Private>
-                    <route.component />
+                    <WrapApp>
+                      <route.component />
+                    </WrapApp>
                   </ProtectedRoute.Private>
                 ) : route.needAuth === null ? (
-                  <route.component />
+                  <WrapApp>
+                    <route.component />
+                  </WrapApp>
                 ) : (
                   <ProtectedRoute.Public>
-                    <route.component />
+                    <WrapApp>
+                      <route.component />
+                    </WrapApp>
                   </ProtectedRoute.Public>
                 )
               }
@@ -52,8 +59,6 @@ export default function App() {
         pauseOnHover
         theme="dark"
       />
-
-      {/* <JoinModal /> */}
     </Provider>
   );
 }

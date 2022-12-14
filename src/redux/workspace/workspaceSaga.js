@@ -55,7 +55,6 @@ function* getWorkspaceListSaga({
 
     if (_.isFunction(onSuccess)) onSuccess();
   } catch (e) {
-    console.log(e);
     if (_.isFunction(onFailure)) onFailure(e);
   }
 }
@@ -83,7 +82,6 @@ function* createWorkspaceSaga({
 
     if (_.isFunction(onSuccess)) onSuccess(workspaceSlug);
   } catch (e) {
-    console.log({ e });
     if (_.isFunction(onFailure)) onFailure(e);
   }
 }
@@ -146,16 +144,14 @@ function* updateWorkspaceSaga({
 
     if (slugChanged) {
       const realtimeKey = yield select(({ auth }) => auth.realtimeKey);
-      realtimeService.sendMessage(clientKey, EventType.WORKSPACE_NAME_CHANGED, {
+      realtimeService.sendMessage(slug, EventType.WORKSPACE_NAME_CHANGED, {
         sent: realtimeKey,
-        workspace: slug,
         data: updatedWorkspace,
       });
     }
     if (_.isFunction(onSuccess))
       onSuccess(slugChanged, updatedWorkspace.workspaceSlug);
   } catch (e) {
-    console.log({ e });
     if (_.isFunction(onFailure)) onFailure(e);
   }
 }
@@ -179,7 +175,6 @@ function* deleteWorkspaceSaga({
     );
     if (_.isFunction(onSuccess)) onSuccess();
   } catch (e) {
-    console.log({ e });
     if (_.isFunction(onFailure)) onFailure(e);
   }
 }
@@ -228,13 +223,12 @@ function* getWorkspaceMembersSaga({
 
     if (_.isFunction(onSuccess)) onSuccess();
   } catch (e) {
-    console.log(e);
     if (_.isFunction(onFailure)) onFailure(e);
   }
 }
 
 function* deleteMemberSaga({
-  payload: { workspaceId, memberId, onSuccess, onFailure },
+  payload: { workspaceId, workspaceSlug, memberId, onSuccess, onFailure },
 }) {
   try {
     const { errors } = yield call(
@@ -246,14 +240,27 @@ function* deleteMemberSaga({
       throw errors;
     }
 
-    yield put(
-      workspaceActions.removeMembers({
-        key: memberId,
-      })
-    );
+    const user = yield select(({ auth }) => auth.user);
+    if (user._id === memberId) {
+      yield put(
+        workspaceActions.removeWorkspaces({
+          key: workspaceSlug,
+        })
+      );
+    } else {
+      yield put(
+        workspaceActions.removeMembers({
+          key: memberId,
+        })
+      );
+    }
+    const realtimeKey = yield select(({ auth }) => auth.realtimeKey);
+    realtimeService.sendMessage(workspaceSlug, EventType.LEAVED_WORKSPACE, {
+      sent: realtimeKey,
+      data: memberId,
+    });
     if (_.isFunction(onSuccess)) onSuccess();
   } catch (e) {
-    console.log({ e });
     if (_.isFunction(onFailure)) onFailure(e);
   }
 }

@@ -1,7 +1,7 @@
-import { CogIcon } from "@heroicons/react/outline";
+import { CogIcon, XCircleIcon } from "@heroicons/react/outline";
 import _ from "lodash";
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import AccessBadge from "../components/access-badge";
 import AvatarList from "../components/avatar-list";
@@ -10,6 +10,7 @@ import Empty from "../components/empty";
 import NewWorkspaceForm from "../components/forms/new-workspace-form";
 import Input from "../components/inputs/input";
 import ListObserver from "../components/list-observer";
+import LeaveTeamModal from "../components/modals/leave-team-modal";
 import Modal from "../components/modals/modal";
 import Navbar from "../components/navbar";
 import { myRouter } from "../helpers/routes";
@@ -25,6 +26,9 @@ export default function Workspace() {
 
   const [showNewWorkspace, setShowNewWorkspace] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const [leftWorkspace, setLeftWorkspace] = useState(null);
+  const user = useSelector(({ auth }) => auth.user);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     getWorkspaceList("", true);
@@ -35,6 +39,22 @@ export default function Workspace() {
       dispatch(workspaceActions.setInfo(null));
     };
   }, []);
+
+  const leaveWorkspace = () => {
+    setIsLoading(true);
+    dispatch(
+      workspaceActions.deleteMemberRequest({
+        workspaceId: leftWorkspace?.workspaceId,
+        workspaceSlug: leftWorkspace?.slug,
+        memberId: user?._id,
+        onSuccess: () => {
+          setIsLoading(false);
+          setLeftWorkspace(null);
+        },
+        onFailure: () => setIsLoading(false),
+      })
+    );
+  };
 
   const getWorkspaceList = (searchText, isNewSearch = false) => {
     dispatch(
@@ -131,7 +151,7 @@ export default function Workspace() {
                             </div>
                           )}
                         </div>
-                        {workspaceObj.isOwner && (
+                        {workspaceObj.isOwner ? (
                           <Link
                             to={myRouter.SETTINGS_WORKSPACE(
                               workspaceObj.workspaceSlug
@@ -139,6 +159,20 @@ export default function Workspace() {
                           >
                             <CogIcon className="h-6 w-6" aria-hidden="true" />
                           </Link>
+                        ) : (
+                          <Button
+                            onClick={() =>
+                              setLeftWorkspace({
+                                workspaceId: workspaceObj.workspace._id,
+                                slug: workspaceObj.workspace.slug,
+                              })
+                            }
+                          >
+                            <XCircleIcon
+                              className="h-6 w-6 text-red-500"
+                              aria-hidden="true"
+                            />
+                          </Button>
                         )}
                       </div>
                     </div>
@@ -149,7 +183,13 @@ export default function Workspace() {
           )}
         </div>
       </div>
-
+      {leftWorkspace && (
+        <LeaveTeamModal
+          onCancel={() => setLeftWorkspace(null)}
+          onLeave={leaveWorkspace}
+          isLoading={isLoading}
+        />
+      )}
       <Modal show={showNewWorkspace} setShow={setShowNewWorkspace}>
         <NewWorkspaceForm />
       </Modal>

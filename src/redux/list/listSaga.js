@@ -68,7 +68,6 @@ function* getListsSaga({
 
     if (_.isFunction(onSuccess)) onSuccess();
   } catch (e) {
-    console.log(e);
     if (_.isFunction(onFailure)) onFailure(e);
   }
 }
@@ -116,14 +115,12 @@ function* createListSaga({
     );
 
     const realtimeKey = yield select(({ auth }) => auth.realtimeKey);
-    realtimeService.sendMessage(clientKey, EventType.NEW_LIST, {
+    realtimeService.sendMessage(workspaceSlug, EventType.NEW_LIST, {
       sent: realtimeKey,
-      workspace: workspaceSlug,
       data,
     });
     if (_.isFunction(onSuccess)) onSuccess(data.slug);
   } catch (e) {
-    console.log(e);
     if (_.isFunction(onFailure)) onFailure(e);
   }
 }
@@ -144,14 +141,12 @@ function* deleteListSaga({
     );
 
     const realtimeKey = yield select(({ auth }) => auth.realtimeKey);
-    realtimeService.sendMessage(clientKey, EventType.DELETE_LIST, {
+    realtimeService.sendMessage(workspaceSlug, EventType.DELETE_LIST, {
       sent: realtimeKey,
-      workspace: workspaceSlug,
       list: listSlug,
     });
     if (_.isFunction(onSuccess)) onSuccess();
   } catch (e) {
-    console.log(e);
     if (_.isFunction(onFailure)) onFailure(e);
   }
 }
@@ -181,15 +176,13 @@ function* updateListSaga({
     );
 
     const realtimeKey = yield select(({ auth }) => auth.realtimeKey);
-    realtimeService.sendMessage(clientKey, EventType.UPDATE_LIST, {
+    realtimeService.sendMessage(workspaceSlug, EventType.UPDATE_LIST, {
       sent: realtimeKey,
-      workspace: workspaceSlug,
       list: listSlug,
       data: updatedList,
     });
     if (_.isFunction(onSuccess)) onSuccess(body.slug);
   } catch (e) {
-    console.log(e);
     if (_.isFunction(onFailure)) onFailure(e);
   }
 }

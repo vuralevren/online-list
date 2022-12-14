@@ -48,7 +48,6 @@ function* getTodosSaga({
 
     if (_.isFunction(onSuccess)) onSuccess();
   } catch (e) {
-    console.log(e);
     if (_.isFunction(onFailure)) onFailure(e);
   }
 }
@@ -79,17 +78,14 @@ function* createTodoSaga({
     );
 
     const realtimeKey = yield select(({ auth }) => auth.realtimeKey);
-    console.log({ realtimeKey });
-    realtimeService.sendMessage(clientKey, EventType.NEW_TODO, {
+    realtimeService.sendMessage(workspaceSlug, EventType.NEW_TODO, {
       sent: realtimeKey,
-      workspace: workspaceSlug,
       list: listSlug,
       status,
       data: createdTodo,
     });
     if (_.isFunction(onSuccess)) onSuccess();
   } catch (e) {
-    console.log(e);
     if (_.isFunction(onFailure)) onFailure(e);
   }
 }
@@ -114,16 +110,14 @@ function* updateTodoSaga({
     );
 
     const realtimeKey = yield select(({ auth }) => auth.realtimeKey);
-    realtimeService.sendMessage(clientKey, EventType.UPDATE_TODO, {
+    realtimeService.sendMessage(workspaceSlug, EventType.UPDATE_TODO, {
       sent: realtimeKey,
-      workspace: workspaceSlug,
       list: listSlug,
       status,
       data: updatedTodo,
     });
     if (_.isFunction(onSuccess)) onSuccess();
   } catch (e) {
-    console.log(e);
     if (_.isFunction(onFailure)) onFailure(e);
   }
 }
@@ -150,7 +144,6 @@ function* updateFieldsTodoSaga({
 
     if (_.isFunction(onSuccess)) onSuccess();
   } catch (e) {
-    console.log(e);
     if (_.isFunction(onFailure)) onFailure(e);
   }
 }
@@ -212,25 +205,14 @@ function* changeStatusTodoSaga({
 
     const realtimeKey = yield select(({ auth }) => auth.realtimeKey);
 
-    console.log("sent message", {
-      channel: clientKey,
-      eventType: EventType.CHANGE_STATUS_TODO,
+    realtimeService.sendMessage(workspaceSlug, EventType.CHANGE_STATUS_TODO, {
       sent: realtimeKey,
-      workspace: workspaceSlug,
-      list: listSlug,
-      status: currentStatus,
-      data: updatedTodo,
-    });
-    realtimeService.sendMessage(clientKey, EventType.CHANGE_STATUS_TODO, {
-      sent: realtimeKey,
-      workspace: workspaceSlug,
       list: listSlug,
       status: currentStatus,
       data: updatedTodo,
     });
     if (_.isFunction(onSuccess)) onSuccess();
   } catch (e) {
-    console.log(e);
     if (_.isFunction(onFailure)) onFailure(e);
   }
 }
@@ -270,16 +252,14 @@ function* deleteTodoSaga({
     }
 
     const realtimeKey = yield select(({ auth }) => auth.realtimeKey);
-    realtimeService.sendMessage(clientKey, EventType.DELETE_TODO, {
+    realtimeService.sendMessage(workspaceSlug, EventType.DELETE_TODO, {
       sent: realtimeKey,
-      workspace: workspaceSlug,
       list: deletedTodo?.listSlug,
       status: deletedTodo?.status,
       data: deletedTodo,
     });
     if (_.isFunction(onSuccess)) onSuccess();
   } catch (e) {
-    console.log(e);
     if (_.isFunction(onFailure)) onFailure(e);
   }
 }

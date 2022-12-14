@@ -1,6 +1,5 @@
-import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import realtimeService from "../redux/realtime/realtimeService";
 
 export const InvitationEventType = {
@@ -8,17 +7,18 @@ export const InvitationEventType = {
   INVITE_MEMBER: "INVITE_MEMBER",
 };
 
-export default function useListenRealtime() {
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-
+export default function useInivitationRealtime() {
   const user = useSelector(({ auth }) => auth.user);
+  const [invitePopup, setInvitePopup] = useState(false);
 
   const inviteMember = ({ message }) => {
-    const { invitedEmail, workspaceId } = message;
+    const { invitedEmail, workspaceId, workspaceName } = message;
     if (invitedEmail !== user?.email) return;
 
-    console.log("davet aldınız..");
+    setInvitePopup({
+      workspaceId,
+      workspaceName,
+    });
   };
 
   const listen = () => {
@@ -34,4 +34,6 @@ export default function useListenRealtime() {
       realtimeService.leave(InvitationEventType.CHANNEL);
     };
   }, []);
+
+  return [invitePopup, setInvitePopup];
 }

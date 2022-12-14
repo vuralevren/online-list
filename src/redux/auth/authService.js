@@ -57,7 +57,6 @@ const authService = {
     return endpoint.get("/user/search", { searchText });
   },
   search(userId, workspaceId, searchText) {
-    console.log("burdayıss");
     return db
       .model("users")
       .lookup({

@@ -1,17 +1,19 @@
-import { useEffect, useState } from "react";
+import _ from "lodash";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
-import { clientKey } from "../configs/altogic";
 import { listActions } from "../redux/list/listSlice";
 import realtimeService from "../redux/realtime/realtimeService";
-import { workspaceActions } from "../redux/workspace/workspaceSlice";
-import useQuery from "./useQuery";
-import { myRouter } from "./routes";
-import { TodoStatusTypes } from "./utils";
 import { todoActions } from "../redux/todo/todoSlice";
+import { workspaceActions } from "../redux/workspace/workspaceSlice";
+import { myRouter } from "./routes";
+import useQuery from "./useQuery";
+import { TodoStatusTypes } from "./utils";
 
 export const EventType = {
   WORKSPACE_NAME_CHANGED: "WORKSPACE_NAME_CHANGED",
+  JOINED_WORKSPACE: "JOINED_WORKSPACE",
+  LEAVED_WORKSPACE: "LEAVED_WORKSPACE",
 
   NEW_LIST: "NEW_LIST",
   UPDATE_LIST: "UPDATE_LIST",
@@ -25,7 +27,6 @@ export const EventType = {
 
 export default function useListenRealtime() {
   const { workspaceSlug, listSlug } = useParams();
-  console.log({ listSlug });
   const statusSlug = useQuery("status");
   const currentStatus =
     statusSlug === TodoStatusTypes.COMPLETED
@@ -37,13 +38,13 @@ export default function useListenRealtime() {
 
   const user = useSelector(({ auth }) => auth.user);
   const realtimeKey = useSelector(({ auth }) => auth.realtimeKey);
-  // const [socketConnected, setSocketConnected] = useState(
-  //   realtimeService.isConnected()
-  // );
+  const workspace = useSelector(({ workspace }) =>
+    _.get(workspace.workspaceList, workspaceSlug)
+  );
 
   const newList = ({ message }) => {
-    const { sent, workspace, data } = message;
-    if (realtimeKey === sent || workspace !== workspaceSlug) return;
+    const { sent, data } = message;
+    if (realtimeKey === sent) return;
 
     if (data?.isPublic) {
       dispatch(
@@ -72,15 +73,15 @@ export default function useListenRealtime() {
   };
 
   const workspaceNameChange = ({ message }) => {
-    const { sent, workspace, data } = message;
-    if (realtimeKey === sent || workspace !== workspaceSlug) return;
+    const { sent, data } = message;
+    if (realtimeKey === sent) return;
 
     navigate(myRouter.HOME(data?.workspaceSlug));
   };
 
   const updateList = ({ message }) => {
-    const { sent, workspace, list, data } = message;
-    if (realtimeKey === sent || workspace !== workspaceSlug) return;
+    const { sent, list, data } = message;
+    if (realtimeKey === sent) return;
 
     dispatch(
       listActions.removeLists({
@@ -99,9 +100,50 @@ export default function useListenRealtime() {
     }
   };
 
+  const joinedWorkspace = ({ message }) => {
+    const { sent, data } = message;
+    if (realtimeKey === sent) return;
+
+    if (workspace) {
+      dispatch(
+        workspaceActions.updateWorkspaceList({
+          key: workspace.slug,
+          value: {
+            ...workspace,
+            userProfilePictures: [...workspace.userProfilePictures, data],
+          },
+        })
+      );
+    }
+  };
+
+  const leavedWorkspace = ({ message }) => {
+    const { sent, data: memberId } = message;
+    if (realtimeKey === sent) return;
+
+    if (workspace) {
+      if (memberId === user?._id) {
+        navigate("/");
+      } else {
+        dispatch(
+          workspaceActions.updateWorkspaceList({
+            key: workspace.slug,
+            value: {
+              ...workspace,
+              userProfilePictures: _.reject(
+                workspace.userProfilePictures,
+                (profile) => profile.user === memberId
+              ),
+            },
+          })
+        );
+      }
+    }
+  };
+
   const deleteList = ({ message }) => {
-    const { sent, workspace, list } = message;
-    if (realtimeKey === sent || workspace !== workspaceSlug) return;
+    const { sent, list } = message;
+    if (realtimeKey === sent) return;
 
     dispatch(
       listActions.removeLists({
@@ -115,13 +157,8 @@ export default function useListenRealtime() {
   };
 
   const newTodo = ({ message }) => {
-    const { sent, workspace, status, list, data } = message;
-    if (
-      realtimeKey === sent ||
-      workspace !== workspaceSlug ||
-      list !== listSlug
-    )
-      return;
+    const { sent, status, list, data } = message;
+    if (realtimeKey === sent || list !== listSlug) return;
 
     if (currentStatus === status) {
       dispatch(
@@ -131,6 +168,7 @@ export default function useListenRealtime() {
         })
       );
     }
+
     dispatch(
       listActions.setTodoSize({
         key: data?.listSlug,
@@ -140,13 +178,8 @@ export default function useListenRealtime() {
   };
 
   const updateTodo = ({ message }) => {
-    const { sent, workspace, status, list, data } = message;
-    if (
-      realtimeKey === sent ||
-      workspace !== workspaceSlug ||
-      list !== listSlug ||
-      currentStatus !== status
-    )
+    const { sent, status, list, data } = message;
+    if (realtimeKey === sent || list !== listSlug || currentStatus !== status)
       return;
 
     dispatch(
@@ -158,22 +191,8 @@ export default function useListenRealtime() {
   };
 
   const changeStatusTodo = ({ message }) => {
-    const { sent, workspace, list, data } = message;
-    console.log("gelen message", {
-      sent,
-      workspace,
-      list,
-      data,
-      realtimeKey,
-      workspaceSlug,
-      listSlug,
-    });
-    if (
-      realtimeKey === sent ||
-      workspace !== workspaceSlug ||
-      list !== listSlug
-    )
-      return;
+    const { sent, list, data } = message;
+    if (realtimeKey === sent || list !== listSlug) return;
 
     dispatch(
       todoActions.updateTodos({
@@ -212,13 +231,8 @@ export default function useListenRealtime() {
   };
 
   const deleteTodo = ({ message }) => {
-    const { sent, workspace, list, data } = message;
-    if (
-      realtimeKey === sent ||
-      workspace !== workspaceSlug ||
-      list !== listSlug
-    )
-      return;
+    const { sent, list, data } = message;
+    if (realtimeKey === sent || list !== listSlug) return;
 
     dispatch(
       todoActions.removeTodos({
@@ -244,26 +258,42 @@ export default function useListenRealtime() {
   };
 
   const listen = () => {
-    realtimeService.listen(
-      EventType.WORKSPACE_NAME_CHANGED,
-      workspaceNameChange
-    );
-    realtimeService.listen(EventType.NEW_LIST, newList);
-    realtimeService.listen(EventType.UPDATE_LIST, updateList);
-    realtimeService.listen(EventType.DELETE_LIST, deleteList);
-    realtimeService.listen(EventType.NEW_TODO, newTodo);
-    realtimeService.listen(EventType.UPDATE_TODO, updateTodo);
-    realtimeService.listen(EventType.CHANGE_STATUS_TODO, changeStatusTodo);
-    realtimeService.listen(EventType.DELETE_TODO, deleteTodo);
+    if (listSlug) {
+      realtimeService.listen(
+        EventType.WORKSPACE_NAME_CHANGED,
+        workspaceNameChange
+      );
+      realtimeService.removeListen(EventType.JOINED_WORKSPACE);
+      realtimeService.removeListen(EventType.LEAVED_WORKSPACE);
+      realtimeService.removeListen(EventType.NEW_LIST);
+      realtimeService.removeListen(EventType.UPDATE_LIST);
+      realtimeService.removeListen(EventType.DELETE_LIST);
+      realtimeService.removeListen(EventType.NEW_TODO);
+      realtimeService.removeListen(EventType.UPDATE_TODO);
+      realtimeService.removeListen(EventType.CHANGE_STATUS_TODO);
+      realtimeService.removeListen(EventType.DELETE_TODO);
+
+      realtimeService.listen(EventType.JOINED_WORKSPACE, joinedWorkspace);
+      realtimeService.listen(EventType.LEAVED_WORKSPACE, leavedWorkspace);
+      realtimeService.listen(EventType.NEW_LIST, newList);
+      realtimeService.listen(EventType.UPDATE_LIST, updateList);
+      realtimeService.listen(EventType.DELETE_LIST, deleteList);
+      realtimeService.listen(EventType.NEW_TODO, newTodo);
+      realtimeService.listen(EventType.UPDATE_TODO, updateTodo);
+      realtimeService.listen(EventType.CHANGE_STATUS_TODO, changeStatusTodo);
+      realtimeService.listen(EventType.DELETE_TODO, deleteTodo);
+    }
   };
 
   useEffect(() => {
-    realtimeService.join(clientKey);
-
     listen();
+  }, [listSlug]);
+
+  useEffect(() => {
+    realtimeService.join(workspaceSlug);
 
     return () => {
-      realtimeService.leave(clientKey);
+      realtimeService.leave(workspaceSlug);
     };
-  }, [workspaceSlug, listSlug]);
+  }, [workspaceSlug]);
 }
