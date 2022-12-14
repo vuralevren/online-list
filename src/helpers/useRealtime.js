@@ -102,8 +102,10 @@ export default function useListenRealtime() {
 
   const joinedWorkspace = ({ message }) => {
     const { sent, data } = message;
+    console.log({ message });
+    console.log({ workspace });
     if (realtimeKey === sent) return;
-
+    console.log("burayı geçemedi");
     if (workspace) {
       dispatch(
         workspaceActions.updateWorkspaceList({
@@ -287,7 +289,7 @@ export default function useListenRealtime() {
 
   useEffect(() => {
     listen();
-  }, [listSlug]);
+  }, [listSlug, workspaceSlug, workspace]);
 
   useEffect(() => {
     realtimeService.join(workspaceSlug);
