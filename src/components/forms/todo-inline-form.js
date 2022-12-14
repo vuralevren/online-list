@@ -63,6 +63,10 @@ export default function TodoInlineForm({
     }
   };
 
+  const handleFocusOut = () => {
+    setSelectedTodo(null);
+  };
+
   const onSubmit = ({ title }) => {
     if (!isLoading) {
       setIsLoading(true);
@@ -148,6 +152,7 @@ export default function TodoInlineForm({
         autoMargin={false}
         newStyle
         autoFocus={!create}
+        onBlur={!create && handleFocusOut}
         register={register("title")}
         error={errors.title}
       />

@@ -54,6 +54,10 @@ export default function ListInlineForm({ selectedList, setSelectedList }) {
     }
   };
 
+  const handleFocusOut = () => {
+    setSelectedList(null);
+  };
+
   const onSubmit = ({ name }) => {
     if (!isLoading) {
       setIsLoading(true);
@@ -97,6 +101,7 @@ export default function ListInlineForm({ selectedList, setSelectedList }) {
         autoMargin={false}
         newStyle
         autoFocus
+        onBlur={handleFocusOut}
         register={register("name")}
         error={errors.name}
       />
