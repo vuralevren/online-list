@@ -17,7 +17,8 @@ function* registerSaga({
   payload: { userReq, emailQuery, workspaceIdQuery, onSuccess, onFailure },
 }) {
   try {
-    const { user, errors } = yield call(
+    console.log({ emailQuery, workspaceIdQuery });
+    const { user, session, errors } = yield call(
       authService.register,
       userReq,
       emailQuery
@@ -36,7 +37,7 @@ function* registerSaga({
       workspaceSlug = workspaceConn.workspaceSlug;
     }
 
-    if (user) yield fork(setUserLocalSaga, user);
+    if (emailQuery && session && user) yield fork(setUserLocalSaga, user);
     if (_.isFunction(onSuccess)) onSuccess(workspaceSlug);
   } catch (e) {
     if (_.isFunction(onFailure)) onFailure(e);

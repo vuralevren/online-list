@@ -1,6 +1,8 @@
+import _ from "lodash";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 import { myRouter } from "../helpers/routes";
 import useQuery from "../helpers/useQuery";
 import { invitationActions } from "../redux/invitation/invitationSlice";
@@ -20,9 +22,12 @@ export default function JoinRedirect() {
         workspaceId,
         email,
         onSuccess: (slug) => {
-          navigate(myRouter.HOME(slug));
+          toast.success("Joined succesfully");
+          navigate("/");
         },
         onFailure: (e) => {
+          console.log({ e });
+          toast.error("Something Wrong!");
           navigate("/");
         },
       })

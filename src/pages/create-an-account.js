@@ -56,6 +56,7 @@ export default function CreateAnAccount() {
         emailQuery,
         workspaceIdQuery,
         onSuccess: (workspaceSlug) => {
+          console.log({ workspaceSlug });
           if (workspaceSlug) {
             navigate(myRouter.HOME(workspaceSlug));
           } else {
