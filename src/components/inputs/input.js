@@ -1,6 +1,9 @@
-import React from "react";
-import { ExclamationCircleIcon } from "@heroicons/react/outline";
+import {
+  ArrowCircleRightIcon,
+  ExclamationCircleIcon,
+} from "@heroicons/react/outline";
 import cs from "classnames";
+import Button from "../button";
 
 function Input({
   label,
@@ -14,6 +17,8 @@ function Input({
   textArea,
   autoMargin,
   newStyle,
+  rightButton,
+  rightButtonProps,
   ...rest
 }) {
   return (
@@ -65,11 +70,25 @@ function Input({
                   "border-red-600 text-red-900 placeholder-red-300 focus:ring-red-600",
                 !prefix ? "rounded-md" : "",
                 className,
+                rightButton && "pr-11",
               ])}
               {...register}
               {...rest}
               autoComplete="off"
             />
+          )}
+          {rightButton && (
+            <Button
+              id="send-button"
+              type="submit"
+              className="absolute top-[4px] right-0 px-2"
+              {...rightButtonProps}
+            >
+              <ArrowCircleRightIcon
+                id="send-icon"
+                className="w-7 h-7 text-gray-500"
+              />
+            </Button>
           )}
         </div>
         {error && (

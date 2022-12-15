@@ -1,6 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import _ from "lodash";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
@@ -35,12 +35,17 @@ export default function ListInlineForm({ selectedList, setSelectedList }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
+  const [didMount, setDidMount] = useState(true);
+  const stateRef = useRef();
+  stateRef.current = didMount;
 
   useEffect(() => {
     document.addEventListener("keydown", handleEscape, false);
+    window.addEventListener("click", handleFocus, false);
 
     return () => {
       document.removeEventListener("keydown", handleEscape, false);
+      window.removeEventListener("click", handleFocus, false);
     };
   }, []);
 
@@ -54,8 +59,17 @@ export default function ListInlineForm({ selectedList, setSelectedList }) {
     }
   };
 
-  const handleFocusOut = () => {
-    setSelectedList(null);
+  const handleFocus = (e) => {
+    if (
+      !document.getElementById("list-inline-form").contains(e.target) &&
+      !document.getElementById("send-button").contains(e.target)
+    ) {
+      // Clicked outside the box
+      if (!stateRef.current) {
+        setSelectedList(null);
+      }
+      setDidMount(false);
+    }
   };
 
   const onSubmit = ({ name }) => {
@@ -95,15 +109,15 @@ export default function ListInlineForm({ selectedList, setSelectedList }) {
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Input
-        id="name"
+        id="list-inline-form"
         name="name"
         className="flex items-center w-full justify-between px-2 py-2 text-sm font-medium rounded-md bg-indigo-800 text-white"
         autoMargin={false}
         newStyle
         autoFocus
-        onBlur={handleFocusOut}
         register={register("name")}
         error={errors.name}
+        rightButton
       />
     </form>
   );

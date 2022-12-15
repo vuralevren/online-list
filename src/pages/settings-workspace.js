@@ -29,7 +29,7 @@ export default function SettingsWorkspace() {
     description: yup
       .string()
       .trim()
-      .max(40, "Description must be at most 180 characters"),
+      .max(180, "Description must be at most 180 characters"),
   });
 
   const {
@@ -82,9 +82,7 @@ export default function SettingsWorkspace() {
   }, [workspace]);
 
   useEffect(() => {
-    if (!_.isEmpty(memberList)) {
-      getMemberList("", true);
-    }
+    getMemberList("", true);
   }, []);
 
   useEffect(() => {
@@ -251,71 +249,81 @@ export default function SettingsWorkspace() {
               </div>
             </div>
           </div>{" "}
-          <div className="mt-6 flex justify-between items-center">
-            <div className="grow">
-              <Input
-                autoMargin={false}
-                placeholder="Search Members"
-                onChange={handleSearch}
-                value={searchText}
-              />
-            </div>
-          </div>
-          <ListObserver onEnd={getMemberList}>
-            <table className="min-w-full">
-              <thead>
-                <tr className="border-t border-gray-200">
-                  <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    <span className="lg:pl-2">
-                      MEMBERS ({workspace?.workspace.userSize})
-                    </span>
-                  </th>
-                  <th className="py-3 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Operation
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-100">
-                {_.map(memberList, (member) => (
-                  <tr className="group group-hover:bg-gray-50" key={member._id}>
-                    <td className="relative px-6 py-5 flex items-center space-x-3 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500">
-                      <div className="flex-shrink-0">
-                        <Avatar
-                          size={10}
-                          anotherUser={{
-                            name: member.name,
-                            profilePicture: member.profilePicture,
-                          }}
-                        />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <span className="absolute inset-0" aria-hidden="true" />
-                        <p className="text-sm font-medium text-gray-900">
-                          {member.name}
-                        </p>
-                      </div>
-                    </td>
-                    {member._id !== user?._id && (
-                      <td className="py-3 text-sm text-gray-500 font-medium">
-                        <Button
-                          className="bg-red-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                          onClick={() =>
-                            setDeletedMember({
-                              workspaceSlug: workspace?.workspace.slug,
-                              workspaceId: workspace?.workspace._id,
-                              memberId: member._id,
-                            })
-                          }
-                        >
-                          Remove
-                        </Button>
-                      </td>
-                    )}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </ListObserver>
+          {_.size(memberList) > 1 && (
+            <>
+              <div className="mt-6 flex justify-between items-center">
+                <div className="grow">
+                  <Input
+                    autoMargin={false}
+                    placeholder="Search Members"
+                    onChange={handleSearch}
+                    value={searchText}
+                  />
+                </div>
+              </div>
+              <ListObserver onEnd={getMemberList}>
+                <table className="min-w-full">
+                  <thead>
+                    <tr className="border-t border-gray-200">
+                      <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <span className="lg:pl-2">
+                          MEMBERS ({workspace?.workspace.userSize})
+                        </span>
+                      </th>
+                      <th className="py-3 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Operation
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-100">
+                    {_.map(memberList, (member) => (
+                      <tr
+                        className="group group-hover:bg-gray-50"
+                        key={member._id}
+                      >
+                        <td className="relative px-6 py-5 flex items-center space-x-3 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500">
+                          <div className="flex-shrink-0">
+                            <Avatar
+                              size={10}
+                              anotherUser={{
+                                name: member.name,
+                                profilePicture: member.profilePicture,
+                              }}
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <span
+                              className="absolute inset-0"
+                              aria-hidden="true"
+                            />
+                            <p className="text-sm font-medium text-gray-900">
+                              {member.name}
+                            </p>
+                          </div>
+                        </td>
+                        {member._id !== user?._id && (
+                          <td className="py-3 text-sm text-gray-500 font-medium">
+                            <Button
+                              className="bg-red-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                              onClick={() =>
+                                setDeletedMember({
+                                  workspaceSlug: workspace?.workspace.slug,
+                                  workspaceId: workspace?.workspace._id,
+                                  memberId: member._id,
+                                })
+                              }
+                            >
+                              Remove
+                            </Button>
+                          </td>
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </ListObserver>
+            </>
+          )}
           {deletedWorkspace && (
             <DeleteModal
               title="Delete Workspace"

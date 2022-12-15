@@ -3,6 +3,7 @@ import _ from "lodash";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import { ClipLoader } from "react-spinners";
 import AccessBadge from "../components/access-badge";
 import AvatarList from "../components/avatar-list";
 import Button from "../components/button";
@@ -29,6 +30,7 @@ export default function Workspace() {
   const [leftWorkspace, setLeftWorkspace] = useState(null);
   const user = useSelector(({ auth }) => auth.user);
   const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     getWorkspaceList("", true);
@@ -57,17 +59,24 @@ export default function Workspace() {
   };
 
   const getWorkspaceList = (searchText, isNewSearch = false) => {
+    setLoading(true);
     dispatch(
       workspaceActions.getWorkspaceListRequest({
         searchText: searchText || isNewSearch ? searchText.trim() : null,
         isNewSearch,
+        onSuccess: () => {
+          setLoading(false);
+        },
+        onFailure: () => {
+          setLoading(false);
+        },
       })
     );
   };
 
   const handleSearch = (e) => {
     const { value } = e.target;
-    setSearchText(_.trim(value));
+    setSearchText(value);
 
     if (_.size(value) > 2) {
       _.debounce(() => {
@@ -109,7 +118,19 @@ export default function Workspace() {
             </Button>
           </div>
           {_.isEmpty(workspaceList) ? (
-            <Empty message="You have no workspace yet." />
+            loading ? (
+              <div className="items-center flex flex-col mt-12">
+                <ClipLoader clas color="#4f47e6" loading={loading} size={120} />
+              </div>
+            ) : (
+              <Empty
+                message={
+                  _.isEmpty(searchText)
+                    ? "You have no workspace yet."
+                    : "Results not found"
+                }
+              />
+            )
           ) : (
             <ListObserver onEnd={getWorkspaceList}>
               <div className="mt-6 max-w-lg mx-auto grid gap-5 lg:grid-cols-3 lg:max-w-none">

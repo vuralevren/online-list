@@ -23,7 +23,7 @@ export default function NewWorkspaceForm(params) {
     description: yup
       .string()
       .trim()
-      .max(40, "Description must be at most 180 characters"),
+      .max(180, "Description must be at most 180 characters"),
   });
 
   const {
