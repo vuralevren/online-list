@@ -68,7 +68,7 @@ export default function Tabs({ settingsOnClick }) {
                       status !== TodoStatusTypes.COMPLETED
                         ? "bg-indigo-100 text-indigo-600"
                         : "bg-gray-100 text-indigo-900",
-                      "hidden ml-2 py-0.5 px-2.5 rounded-full text-xs font-medium md:inline-block"
+                      "ml-2 py-0.5 px-2.5 rounded-full text-xs font-medium"
                     )}
                   >
                     {list?.todoSize}
@@ -96,7 +96,7 @@ export default function Tabs({ settingsOnClick }) {
                       status === TodoStatusTypes.COMPLETED
                         ? "bg-indigo-100 text-indigo-600"
                         : "bg-gray-100 text-indigo-900",
-                      "hidden ml-2 py-0.5 px-2.5 rounded-full text-xs font-medium md:inline-block"
+                      "ml-2 py-0.5 px-2.5 rounded-full text-xs font-medium"
                     )}
                   >
                     {list?.completedSize}
