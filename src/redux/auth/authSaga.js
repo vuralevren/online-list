@@ -17,7 +17,6 @@ function* registerSaga({
   payload: { userReq, emailQuery, workspaceIdQuery, onSuccess, onFailure },
 }) {
   try {
-    console.log({ emailQuery, workspaceIdQuery });
     const { user, session, errors } = yield call(
       authService.register,
       userReq,

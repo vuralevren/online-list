@@ -20,15 +20,11 @@ function* sendInvitationSaga({
       throw errors;
     }
 
-    realtimeService.sendMessage(
-      InvitationEventType.CHANNEL,
-      InvitationEventType.INVITE_MEMBER,
-      {
-        invitedEmail: email,
-        workspaceId,
-        workspaceName,
-      }
-    );
+    realtimeService.sendMessage(email, InvitationEventType.INVITE_MEMBER, {
+      invitedEmail: email,
+      workspaceId,
+      workspaceName,
+    });
     if (_.isFunction(onSuccess)) onSuccess();
   } catch (e) {
     if (_.isFunction(onFailure)) onFailure(e);
@@ -63,7 +59,7 @@ function* joinWorkspaceSaga({
       onSuccess(data.workspaceConnection.workspaceSlug);
 
     const user = yield select(({ auth }) => auth.user);
-    const realtimeKey = yield select(({ auth }) => auth.realtimeKey);
+    const realtimeKey = yield select(({ realtime }) => realtime.realtimeKey);
     realtimeService.sendMessage(
       data.workspaceConnection.workspaceSlug,
       EventType.JOINED_WORKSPACE,

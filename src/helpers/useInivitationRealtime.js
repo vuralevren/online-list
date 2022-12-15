@@ -3,7 +3,6 @@ import { useSelector } from "react-redux";
 import realtimeService from "../redux/realtime/realtimeService";
 
 export const InvitationEventType = {
-  CHANNEL: "INVITATION",
   INVITE_MEMBER: "INVITE_MEMBER",
 };
 
@@ -12,8 +11,7 @@ export default function useInivitationRealtime() {
   const [invitePopup, setInvitePopup] = useState(false);
 
   const inviteMember = ({ message }) => {
-    const { invitedEmail, workspaceId, workspaceName } = message;
-    if (invitedEmail !== user?.email) return;
+    const { workspaceId, workspaceName } = message;
 
     setInvitePopup({
       workspaceId,
@@ -25,15 +23,25 @@ export default function useInivitationRealtime() {
     realtimeService.listen(InvitationEventType.INVITE_MEMBER, inviteMember);
   };
 
+  const removeListen = () => {
+    realtimeService.removeListen(
+      InvitationEventType.INVITE_MEMBER,
+      inviteMember
+    );
+  };
+
   useEffect(() => {
-    realtimeService.join(InvitationEventType.CHANNEL);
+    if (user?.email) {
+      realtimeService.join(user?.email);
 
-    listen();
+      listen();
 
-    return () => {
-      realtimeService.leave(InvitationEventType.CHANNEL);
-    };
-  }, []);
+      return () => {
+        removeListen();
+        realtimeService.leave(user?.email);
+      };
+    }
+  }, [user?.email]);
 
   return [invitePopup, setInvitePopup];
 }

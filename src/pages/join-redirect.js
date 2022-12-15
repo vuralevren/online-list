@@ -26,7 +26,6 @@ export default function JoinRedirect() {
           navigate("/");
         },
         onFailure: (e) => {
-          console.log({ e });
           toast.error("Something Wrong!");
           navigate("/");
         },

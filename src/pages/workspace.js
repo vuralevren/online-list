@@ -120,7 +120,7 @@ export default function Workspace() {
           {_.isEmpty(workspaceList) ? (
             loading ? (
               <div className="items-center flex flex-col mt-12">
-                <ClipLoader clas color="#4f47e6" loading={loading} size={120} />
+                <ClipLoader color="#4f47e6" loading={loading} size={120} />
               </div>
             ) : (
               <Empty

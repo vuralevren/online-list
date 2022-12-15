@@ -96,7 +96,7 @@ export default function TodoInlineForm({
         listSlug,
         status:
           status === TodoStatusTypes.COMPLETED
-            ? status === TodoStatusTypes.COMPLETED
+            ? TodoStatusTypes.COMPLETED
             : TodoStatusTypes.TODO,
         onSuccess: (slug) => {
           setIsLoading(false);

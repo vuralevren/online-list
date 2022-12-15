@@ -113,7 +113,7 @@ function* createListSaga({
       })
     );
 
-    const realtimeKey = yield select(({ auth }) => auth.realtimeKey);
+    const realtimeKey = yield select(({ realtime }) => realtime.realtimeKey);
     realtimeService.sendMessage(workspaceSlug, EventType.NEW_LIST, {
       sent: realtimeKey,
       data,
@@ -139,7 +139,7 @@ function* deleteListSaga({
       })
     );
 
-    const realtimeKey = yield select(({ auth }) => auth.realtimeKey);
+    const realtimeKey = yield select(({ realtime }) => realtime.realtimeKey);
     realtimeService.sendMessage(workspaceSlug, EventType.DELETE_LIST, {
       sent: realtimeKey,
       list: listSlug,
@@ -174,7 +174,7 @@ function* updateListSaga({
       })
     );
 
-    const realtimeKey = yield select(({ auth }) => auth.realtimeKey);
+    const realtimeKey = yield select(({ realtime }) => realtime.realtimeKey);
     realtimeService.sendMessage(workspaceSlug, EventType.UPDATE_LIST, {
       sent: realtimeKey,
       list: listSlug,

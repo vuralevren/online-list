@@ -1,6 +1,7 @@
 import _ from "lodash";
 import { all, call, put, select, takeLatest } from "redux-saga/effects";
 import { EventType } from "../../helpers/useRealtime";
+import { listActions } from "../list/listSlice";
 import realtimeService from "../realtime/realtimeService";
 import workspaceService from "./workspaceService";
 import { workspaceActions } from "./workspaceSlice";
@@ -142,7 +143,7 @@ function* updateWorkspaceSaga({
     );
 
     if (slugChanged) {
-      const realtimeKey = yield select(({ auth }) => auth.realtimeKey);
+      const realtimeKey = yield select(({ realtime }) => realtime.realtimeKey);
       realtimeService.sendMessage(slug, EventType.WORKSPACE_NAME_CHANGED, {
         sent: realtimeKey,
         data: updatedWorkspace,
@@ -172,6 +173,10 @@ function* deleteWorkspaceSaga({
         key: workspaceSlug,
       })
     );
+    const realtimeKey = yield select(({ realtime }) => realtime.realtimeKey);
+    realtimeService.sendMessage(workspaceSlug, EventType.WORKSPACE_DELETED, {
+      sent: realtimeKey,
+    });
     if (_.isFunction(onSuccess)) onSuccess();
   } catch (e) {
     if (_.isFunction(onFailure)) onFailure(e);
@@ -253,7 +258,7 @@ function* deleteMemberSaga({
         })
       );
     }
-    const realtimeKey = yield select(({ auth }) => auth.realtimeKey);
+    const realtimeKey = yield select(({ realtime }) => realtime.realtimeKey);
     realtimeService.sendMessage(workspaceSlug, EventType.LEAVED_WORKSPACE, {
       sent: realtimeKey,
       data: memberId,
@@ -290,7 +295,7 @@ function* getWorkspaceListBySlugSaga({
 }
 
 function* getIsMemberWorkspaceSaga({
-  payload: { slug, onSuccess, onFailure },
+  payload: { slug, fromRealtime, onSuccess, onFailure },
 }) {
   try {
     const { data, errors } = yield call(
@@ -301,6 +306,14 @@ function* getIsMemberWorkspaceSaga({
       throw errors;
     }
 
+    if (data.isMember && fromRealtime) {
+      yield put(
+        listActions.updateLists({
+          key: fromRealtime.data?.slug,
+          value: fromRealtime.data,
+        })
+      );
+    }
     if (_.isFunction(onSuccess)) onSuccess(data.isMember);
   } catch (e) {
     if (_.isFunction(onFailure)) onFailure(e);

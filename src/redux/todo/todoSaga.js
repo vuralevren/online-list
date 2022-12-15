@@ -76,7 +76,7 @@ function* createTodoSaga({
       })
     );
 
-    const realtimeKey = yield select(({ auth }) => auth.realtimeKey);
+    const realtimeKey = yield select(({ realtime }) => realtime.realtimeKey);
     realtimeService.sendMessage(workspaceSlug, EventType.NEW_TODO, {
       sent: realtimeKey,
       list: listSlug,
@@ -108,7 +108,7 @@ function* updateTodoSaga({
       })
     );
 
-    const realtimeKey = yield select(({ auth }) => auth.realtimeKey);
+    const realtimeKey = yield select(({ realtime }) => realtime.realtimeKey);
     realtimeService.sendMessage(workspaceSlug, EventType.UPDATE_TODO, {
       sent: realtimeKey,
       list: listSlug,
@@ -202,7 +202,7 @@ function* changeStatusTodoSaga({
       );
     }
 
-    const realtimeKey = yield select(({ auth }) => auth.realtimeKey);
+    const realtimeKey = yield select(({ realtime }) => realtime.realtimeKey);
 
     realtimeService.sendMessage(workspaceSlug, EventType.CHANGE_STATUS_TODO, {
       sent: realtimeKey,
@@ -250,7 +250,7 @@ function* deleteTodoSaga({
       );
     }
 
-    const realtimeKey = yield select(({ auth }) => auth.realtimeKey);
+    const realtimeKey = yield select(({ realtime }) => realtime.realtimeKey);
     realtimeService.sendMessage(workspaceSlug, EventType.DELETE_TODO, {
       sent: realtimeKey,
       list: deletedTodo?.listSlug,
