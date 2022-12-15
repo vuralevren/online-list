@@ -126,7 +126,7 @@ export default function Template({ newButtonOnClick, children }) {
                 </Transition.Child>
                 <Link to={myRouter.WORKSPACE}>
                   <div className="flex-shrink-0 flex items-center px-4">
-                    <Logo w="250px" />
+                    <Logo w="50px" h="50px" />
                   </div>
                 </Link>
                 <div className="mt-5 flex-1 h-0 overflow-y-auto">
@@ -151,7 +151,7 @@ export default function Template({ newButtonOnClick, children }) {
           <div className="flex flex-col flex-grow pt-5 bg-indigo-700 overflow-y-auto">
             <Link to={myRouter.WORKSPACE}>
               <div className="flex items-center justify-center flex-shrink-0 px-4">
-                <Logo />
+                <Logo w="50px" h="50px" />
               </div>
             </Link>
             <div className="mt-5 flex-1 flex flex-col">

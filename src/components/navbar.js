@@ -36,7 +36,7 @@ export default function Navbar() {
               </Link>
 
               <div className="flex lg:hidden"></div>
-              <div className="hidden lg:block lg:w-80">
+              <div className="lg:block lg:w-80">
                 <div className="flex items-center justify-end">
                   {user ? (
                     <Menu as="div" className="ml-4 relative flex-shrink-0">
